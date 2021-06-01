@@ -4,6 +4,8 @@ import com.github.garyparrot.highbrow.model.hacker.news.item.Item;
 import com.github.garyparrot.highbrow.model.hacker.news.item.ItemType;
 import com.github.garyparrot.highbrow.util.MapUtility;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -29,7 +31,7 @@ public abstract class AbstractMapItem implements Item {
     long descendants;
 
     @Override
-    public String toString() {
+    public @NotNull String toString() {
         return "AbstractMapItem{" +
                 "id=" + id +
                 ", type=" + type +
@@ -68,7 +70,7 @@ public abstract class AbstractMapItem implements Item {
             title = (String) MapUtility.getOrDefault(map, "title", null);
             kids = (List<Long>) MapUtility.getOrDefault(map, "kids", null);
             pollOptIds = (List<Long>) MapUtility.getOrDefault(map, "parts", null);
-            descendants = (long) MapUtility.getOrDefault(map, "descendants", BAD_LONG_VALUE);
+            descendants = (long) MapUtility.getOrDefault(map, "descendants", 0L);
         } catch (NullPointerException | ClassCastException | IllegalArgumentException e) {
             throw new IllegalArgumentException(e);
         }
