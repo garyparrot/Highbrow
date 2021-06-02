@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <data>
+        <variable name="item" type="com.github.garyparrot.highbrow.model.hacker.news.item.Comment" />
+        <variable name="number" type="java.lang.Integer" />
+        <import type="com.github.garyparrot.highbrow.layout.present.ItemPresenter"/>
+        <import type="android.text.Html"/>
+    </data>
+
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/card"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:cardCornerRadius="0dp"
+        android:clickable="true"
+        android:focusable="true"
+        >
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            >
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="10dp"
+                >
+
+                <com.google.android.material.textview.MaterialTextView
+                    android:id="@+id/textViewAuthor"
+                    android:text="@{item.author}"
+                    tools:text="garyparrot"
+                    style="@style/TextAppearance.MaterialComponents.Subtitle2"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintLeft_toLeftOf="parent"
+                    android:textColor="#ee6633"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+
+                <com.google.android.material.textview.MaterialTextView
+                    android:id="@+id/textViewTime"
+                    android:text="@{ItemPresenter.getPastedTime(item.time)}"
+                    tools:text="3d"
+                    style="@style/TextAppearance.MaterialComponents.Subtitle2"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintRight_toRightOf="parent"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    />
+
+                <com.google.android.material.textview.MaterialTextView
+                    style="@style/TextAppearance.MdcTypographyStyles.Body3"
+                    app:layout_constraintTop_toBottomOf="@id/textViewAuthor"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@{Html.fromHtml(item.text)}"
+                    tools:text="@string/lorem"
+                    />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#cccccc"/>
+
+        </LinearLayout>
+
+    </com.google.android.material.card.MaterialCardView>
+
+</layout>

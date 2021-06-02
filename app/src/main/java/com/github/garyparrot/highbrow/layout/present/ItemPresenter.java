@@ -1,11 +1,13 @@
 package com.github.garyparrot.highbrow.layout.present;
 
+import android.view.View;
+
 import com.github.garyparrot.highbrow.model.hacker.news.item.Story;
 
 import java.net.URI;
 import java.util.Locale;
 
-public class StoryItemPresenter {
+public class ItemPresenter {
 
     public static String toScoreString(Story item) {
         return String.format(Locale.ENGLISH, "%dp",item.getScore());
@@ -20,6 +22,10 @@ public class StoryItemPresenter {
             return "news.ycombinator.com";
         URI uri = URI.create(url);
         return uri.getHost();
+    }
+
+    public static void onClick(View view) {
+        view.performClick();
     }
 
     public static String getPastedTime(long momentSecond) {

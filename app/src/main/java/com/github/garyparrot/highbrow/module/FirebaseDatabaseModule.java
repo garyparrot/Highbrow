@@ -24,6 +24,7 @@ public final class FirebaseDatabaseModule {
     @HackerNews
     FirebaseDatabase hackerNewsFirebaseDatabase(@ApplicationContext Context context) {
         FirebaseApp.initializeApp(context);
+        FirebaseDatabase.getInstance().setPersistenceEnabled(true);
         return FirebaseDatabase.getInstance(HACKER_NEWS_FIREBASE_URL);
     }
 

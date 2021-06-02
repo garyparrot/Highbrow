@@ -55,7 +55,7 @@ public abstract class AbstractMapItem implements Item {
         try {
             id = (long) Objects.requireNonNull(map.get("id"));
             type = Objects.requireNonNull(ItemType.findByString((String) map.get("type")));
-            author = (String) Objects.requireNonNull(map.get("by"));
+            author = (String) map.get("by");
             time = (long) Objects.requireNonNull(map.get("time"));
             //noinspection ConstantConditions
             isDead = map.containsKey("dead") && ((boolean) map.get("dead"));
@@ -72,7 +72,7 @@ public abstract class AbstractMapItem implements Item {
             pollOptIds = (List<Long>) MapUtility.getOrDefault(map, "parts", null);
             descendants = (long) MapUtility.getOrDefault(map, "descendants", 0L);
         } catch (NullPointerException | ClassCastException | IllegalArgumentException e) {
-            throw new IllegalArgumentException(e);
+            throw new IllegalArgumentException("Bad Map: " + map.toString(), e);
         }
     }
 
@@ -88,6 +88,8 @@ public abstract class AbstractMapItem implements Item {
 
     @Override
     public String getAuthor() {
+        if(isDeleted)
+            return DELETED_ITEM_AUTHOR;
         return author;
     }
 
@@ -110,9 +112,9 @@ public abstract class AbstractMapItem implements Item {
         return descendants;
     }
 
-    public Iterable<Long> getKids() {
+    public List<Long> getKids() {
         if (kids != null)
-            return Collections.unmodifiableCollection(kids);
+            return Collections.unmodifiableList(kids);
         return Collections.emptyList();
     }
 
@@ -125,10 +127,14 @@ public abstract class AbstractMapItem implements Item {
     }
 
     public String getTitle() {
+        if(isDeleted || title == null)
+            return DELETED_ITEM_TITLE;
         return title;
     }
 
     public String getText() {
+        if(isDeleted || text == null)
+            return DELETED_ITEM_TEXT;
         return text;
     }
 

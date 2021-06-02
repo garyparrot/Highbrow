@@ -1,3 +1,6 @@
 <resources>
     <string name="app_name">Highbrow</string>
+    <string name="search">Search</string>
+    <string name="content_description_search">Search Story</string>
+    <string name="lorem">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque vel turpis nec ex fermentum aliquet. Aenean vehicula posuere ligula, sed aliquam massa dignissim id. Nunc maximus mauris ac dolor ornare, ac accumsan nulla vehicula. Sed vulputate nunc risus. Mauris non urna vitae neque ornare aliquam. Donec consequat nec leo nec pulvinar. Nunc at sapien nec orci molestie cursus quis vitae dui. Donec sed risus ac enim congue lacinia in at nunc. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Nam condimentum maximus velit, id porta dolor mollis ac. Mauris eget facilisis turpis. Cras iaculis ornare sem, nec euismod nisl hendrerit et. Integer vitae diam vel ex accumsan efficitur. Nunc posuere finibus neque, iaculis suscipit libero consectetur tincidunt. Donec consectetur augue est, quis dapibus magna euismod et. Etiam a vestibulum ipsum.</string>
 </resources>

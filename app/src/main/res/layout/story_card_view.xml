@@ -6,7 +6,7 @@
     <data>
         <variable name="item" type="com.github.garyparrot.highbrow.model.hacker.news.item.Story" />
         <variable name="number" type="java.lang.Integer" />
-        <import type="com.github.garyparrot.highbrow.layout.present.StoryItemPresenter"/>
+        <import type="com.github.garyparrot.highbrow.layout.present.ItemPresenter"/>
     </data>
 
     <com.google.android.material.card.MaterialCardView
@@ -40,7 +40,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@{StoryItemPresenter.toNumberFormat(number)}"
+                    android:text="@{ItemPresenter.toNumberFormat(number)}"
                     tools:text="1"/>
 
                 <TextView
@@ -48,7 +48,7 @@
                     android:textAllCaps="false"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@{StoryItemPresenter.toScoreString(item)}"
+                    android:text="@{ItemPresenter.toScoreString(item)}"
                     tools:text="300p"
                     />
 
@@ -85,7 +85,7 @@
                     android:layout_marginTop="2dp"
                     android:layout_marginBottom="2dp"
                     style="@style/TextAppearance.MdcTypographyStyles.decoration"
-                    android:text="@{StoryItemPresenter.getDomainName(item.getUrl())}"
+                    android:text="@{ItemPresenter.getDomainName(item.getUrl())}"
                     tools:text="news.ycombinator.com"
                     android:singleLine="true"
                     android:layout_width="0dp"
@@ -100,7 +100,7 @@
                     app:layout_constraintBottom_toBottomOf="parent"
                     android:layout_marginTop="2dp"
                     android:layout_marginBottom="2dp"
-                    android:text="@{StoryItemPresenter.getInformation(item)}"
+                    android:text="@{ItemPresenter.getInformation(item)}"
                     tools:text="3h - by garyparrot"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"/>

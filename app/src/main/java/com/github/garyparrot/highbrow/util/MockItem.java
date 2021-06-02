@@ -1,11 +1,27 @@
 package com.github.garyparrot.highbrow.util;
 
+import com.github.garyparrot.highbrow.model.hacker.news.item.Comment;
 import com.github.garyparrot.highbrow.model.hacker.news.item.ItemType;
 import com.github.garyparrot.highbrow.model.hacker.news.item.Story;
+import com.github.garyparrot.highbrow.model.hacker.news.item.general.GeneraComment;
 import com.github.garyparrot.highbrow.model.hacker.news.item.general.GeneralStory;
+
+import java.util.Collection;
 import java.util.Collections;
 
-public class MockStory {
+public class MockItem {
+
+    public static Comment getEmptyComment() {
+        return GeneraComment.builder()
+                .author("")
+                .id(0)
+                .kids(Collections.emptyList())
+                .parentId(0)
+                .text("")
+                .time(0)
+                .itemType(ItemType.Comment)
+                .build();
+    }
 
     public static Story getEmptyStory() {
         return GeneralStory.builder()

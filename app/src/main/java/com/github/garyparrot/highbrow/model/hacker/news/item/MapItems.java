@@ -105,7 +105,13 @@ public final class MapItems {
     }
 
     public static boolean isValidItem(Item item) {
-        // Check member correct
+        // special case for deleted item
+        if(item.isDeleted()) {
+            if (item.getId() <= 0) return false;
+            if (item.getItemType() == null) return false;
+            if (item.getTime() < 0) return false;
+            return true;
+        }
         if (item.getAuthor() == null) return false;
         if (item.getId() <= 0) return false;
         if (item.getItemType() == null) return false;

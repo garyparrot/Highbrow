@@ -4,15 +4,10 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.databinding.DataBindingUtil;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
-import android.graphics.Color;
 import android.os.Bundle;
-import android.view.ViewGroup;
-import android.widget.LinearLayout;
-import android.widget.TextView;
 
 import com.github.garyparrot.highbrow.databinding.ActivityMainBinding;
-import com.github.garyparrot.highbrow.layout.adapter.RecyclerAdapter;
-import com.github.garyparrot.highbrow.layout.view.StoryItem;
+import com.github.garyparrot.highbrow.layout.adapter.StoryRecyclerAdapter;
 import com.github.garyparrot.highbrow.module.FirebaseDatabaseModule;
 import com.github.garyparrot.highbrow.service.HackerNewsService;
 import com.github.garyparrot.highbrow.util.LogUtility;
@@ -23,7 +18,6 @@ import java.util.List;
 import javax.inject.Inject;
 
 import dagger.hilt.android.AndroidEntryPoint;
-import timber.log.Timber;
 
 @AndroidEntryPoint
 public class MainActivity extends AppCompatActivity {
@@ -47,7 +41,7 @@ public class MainActivity extends AppCompatActivity {
         hackerNewsService.topStoryIds()
                 .addOnCompleteListener(topStoriesTask -> {
                     List<Long> topStories = topStoriesTask.getResult();
-                    RecyclerAdapter adapter = new RecyclerAdapter(hackerNewsService, topStories);
+                    StoryRecyclerAdapter adapter = new StoryRecyclerAdapter(this, hackerNewsService, topStories);
                     binding.recycleView.setAdapter(adapter);
                 });
     }
