@@ -12,8 +12,11 @@ import android.content.res.Resources;
 import android.os.Bundle;
 
 import com.github.garyparrot.highbrow.databinding.ActivityStoryBinding;
+import com.github.garyparrot.highbrow.model.hacker.news.item.Story;
+import com.github.garyparrot.highbrow.model.hacker.news.item.general.GeneralStory;
 import com.github.garyparrot.highbrow.service.HackerNewsService;
 import com.google.android.material.tabs.TabLayoutMediator;
+import com.google.gson.Gson;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -25,24 +28,24 @@ import dagger.hilt.android.AndroidEntryPoint;
 public class StoryActivity extends AppCompatActivity {
 
     @Inject
+    Gson gson;
+
+    @Inject
     HackerNewsService hackerNewsService;
 
-    public static final String BUNDLE_STORY_ID = "BUNDLE_STORY_ID";
-    public static final String BUNDLE_ARTICLE_URL = "BUNDLE_ARTICLE_URL";
+    public static final String BUNDLE_STORY_JSON = "BUNDLE_STORY_JSON";
 
-    private String articleUrl;
-    private long storyId;
+    private Story story;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        ActivityStoryBinding binding = DataBindingUtil.setContentView(this, R.layout.activity_story);
 
         Bundle bundle = getIntent().getExtras();
+        story = gson.fromJson(bundle.getString(BUNDLE_STORY_JSON), GeneralStory.class);
 
-        storyId = bundle.getLong(BUNDLE_STORY_ID);
-        articleUrl = bundle.getString(BUNDLE_ARTICLE_URL);
-
+        ActivityStoryBinding binding = DataBindingUtil.setContentView(this, R.layout.activity_story);
+        binding.setStory(story);
         binding.viewPager.setAdapter(new ScreenSlidePagerAdapter(this));
 
         new TabLayoutMediator(binding.tabLayout, binding.viewPager, (tab, position) -> {
@@ -65,9 +68,9 @@ public class StoryActivity extends AppCompatActivity {
         @Override
         public Fragment createFragment(int position) {
             if(position == 0)
-                return CommentFragment.newInstance(storyId);
+                return CommentFragment.newInstance(story.getId());
             else if(position == 1)
-                return BrowserFragment.newInstance(articleUrl);
+                return BrowserFragment.newInstance(story.getUrl());
             else
                 throw new AssertionError("Suppose there is only two Tabs");
         }

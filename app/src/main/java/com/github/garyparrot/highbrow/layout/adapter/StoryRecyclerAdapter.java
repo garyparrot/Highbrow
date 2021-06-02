@@ -8,15 +8,17 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.github.garyparrot.highbrow.StoryActivity;
-import com.github.garyparrot.highbrow.databinding.StoryCardViewBinding;
 import com.github.garyparrot.highbrow.layout.view.StoryItem;
 import com.github.garyparrot.highbrow.model.hacker.news.item.Story;
 import com.github.garyparrot.highbrow.service.HackerNewsService;
 import com.github.garyparrot.highbrow.util.MockItem;
+import com.google.gson.Gson;
 
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
+
+import dagger.hilt.android.AndroidEntryPoint;
 
 public class StoryRecyclerAdapter extends RecyclerView.Adapter<StoryRecyclerAdapter.ViewHolder> {
 
@@ -24,15 +26,17 @@ public class StoryRecyclerAdapter extends RecyclerView.Adapter<StoryRecyclerAdap
     private final List<Long> targetIds;
     private final HackerNewsService hackerNews;
     private final Context context;
+    private final Gson gson;
 
     private static int getNextRequestId() {
         return nextRequestId++;
     }
 
-    public StoryRecyclerAdapter(Context context, HackerNewsService service, List<Long> targets) {
+    public StoryRecyclerAdapter(Context context, HackerNewsService service, List<Long> targets, Gson gson) {
         this.context = context;
         hackerNews = service;
         targetIds = targets;
+        this.gson = gson;
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
@@ -67,8 +71,7 @@ public class StoryRecyclerAdapter extends RecyclerView.Adapter<StoryRecyclerAdap
         StoryItem item = new StoryItem(parent.getContext());
         item.setOnClickListener((view) -> {
             Intent intent = new Intent(context, StoryActivity.class);
-            intent.putExtra(StoryActivity.BUNDLE_STORY_ID, item.getStory().getId());
-            intent.putExtra(StoryActivity.BUNDLE_ARTICLE_URL, item.getStory().getUrl());
+            intent.putExtra(StoryActivity.BUNDLE_STORY_JSON, gson.toJson(item.getStory()));
             context.startActivity(intent);
         });
 

@@ -7,6 +7,7 @@ import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.WebViewClient;
 
 import com.github.garyparrot.highbrow.databinding.FragmentBrowserBinding;
 import com.github.garyparrot.highbrow.service.HackerNewsService;
@@ -45,6 +46,7 @@ public class BrowserFragment extends Fragment {
         FragmentBrowserBinding binding = FragmentBrowserBinding.inflate(inflater, container, false);
         Bundle bundle = getArguments();
 
+        binding.webView.setWebViewClient(new WebViewClient());
         binding.webView.loadUrl(bundle.getString(BUNDLE_URL));
 
         return binding.getRoot();
