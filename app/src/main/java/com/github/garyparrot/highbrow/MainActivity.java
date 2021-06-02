@@ -2,6 +2,7 @@ package com.github.garyparrot.highbrow;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.databinding.DataBindingUtil;
+import androidx.recyclerview.widget.LinearLayoutManager;
 
 import android.graphics.Color;
 import android.os.Bundle;
@@ -10,11 +11,14 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.github.garyparrot.highbrow.databinding.ActivityMainBinding;
+import com.github.garyparrot.highbrow.layout.adapter.RecyclerAdapter;
 import com.github.garyparrot.highbrow.layout.view.StoryItem;
 import com.github.garyparrot.highbrow.module.FirebaseDatabaseModule;
 import com.github.garyparrot.highbrow.service.HackerNewsService;
 import com.github.garyparrot.highbrow.util.LogUtility;
 import com.google.firebase.database.DatabaseReference;
+
+import java.util.List;
 
 import javax.inject.Inject;
 
@@ -38,19 +42,13 @@ public class MainActivity extends AppCompatActivity {
 
         LogUtility.setupTimber();
 
+        binding.recycleView.setLayoutManager(new LinearLayoutManager(this));
+
         hackerNewsService.topStoryIds()
-                .addOnCompleteListener(x -> {
-                    int number = 1;
-                    for (Long aLong : x.getResult()) {
-                        final int refNumbering = number++;
-                        hackerNewsService.getStory(aLong).addOnCompleteListener(story -> {
-                            StoryItem storyItem = new StoryItem(this);
-                            storyItem.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-                            storyItem.setStory(story.getResult());
-                            storyItem.setNumber(refNumbering);
-                            binding.storyList.addView(storyItem);
-                        });
-                    }
+                .addOnCompleteListener(topStoriesTask -> {
+                    List<Long> topStories = topStoriesTask.getResult();
+                    RecyclerAdapter adapter = new RecyclerAdapter(hackerNewsService, topStories);
+                    binding.recycleView.setAdapter(adapter);
                 });
     }
 }
