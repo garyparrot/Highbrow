@@ -8,6 +8,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.github.garyparrot.highbrow.StoryActivity;
+import com.github.garyparrot.highbrow.databinding.StoryCardViewBinding;
 import com.github.garyparrot.highbrow.layout.view.StoryItem;
 import com.github.garyparrot.highbrow.model.hacker.news.item.Story;
 import com.github.garyparrot.highbrow.service.HackerNewsService;
@@ -67,6 +68,7 @@ public class StoryRecyclerAdapter extends RecyclerView.Adapter<StoryRecyclerAdap
         item.setOnClickListener((view) -> {
             Intent intent = new Intent(context, StoryActivity.class);
             intent.putExtra(StoryActivity.BUNDLE_STORY_ID, item.getStory().getId());
+            intent.putExtra(StoryActivity.BUNDLE_ARTICLE_URL, item.getStory().getUrl());
             context.startActivity(intent);
         });
 

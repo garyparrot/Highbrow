@@ -1,20 +1,21 @@
 package com.github.garyparrot.highbrow;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.databinding.DataBindingUtil;
-import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentActivity;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.viewpager2.adapter.FragmentStateAdapter;
 
+import android.content.res.Resources;
 import android.os.Bundle;
 
-import com.github.garyparrot.highbrow.databinding.ActivityMainBinding;
 import com.github.garyparrot.highbrow.databinding.ActivityStoryBinding;
-import com.github.garyparrot.highbrow.layout.adapter.CommentRecyclerAdapter;
-import com.github.garyparrot.highbrow.model.hacker.news.item.Story;
-import com.github.garyparrot.highbrow.module.FirebaseDatabaseModule;
 import com.github.garyparrot.highbrow.service.HackerNewsService;
+import com.google.android.material.tabs.TabLayoutMediator;
 
-import java.util.Collections;
-import java.util.List;
+import org.jetbrains.annotations.NotNull;
 
 import javax.inject.Inject;
 
@@ -27,7 +28,9 @@ public class StoryActivity extends AppCompatActivity {
     HackerNewsService hackerNewsService;
 
     public static final String BUNDLE_STORY_ID = "BUNDLE_STORY_ID";
+    public static final String BUNDLE_ARTICLE_URL = "BUNDLE_ARTICLE_URL";
 
+    private String articleUrl;
     private long storyId;
 
     @Override
@@ -38,16 +41,40 @@ public class StoryActivity extends AppCompatActivity {
         Bundle bundle = getIntent().getExtras();
 
         storyId = bundle.getLong(BUNDLE_STORY_ID);
+        articleUrl = bundle.getString(BUNDLE_ARTICLE_URL);
 
-        binding.recycleView.setLayoutManager(new LinearLayoutManager(this));
+        binding.viewPager.setAdapter(new ScreenSlidePagerAdapter(this));
 
-        hackerNewsService.getStory(storyId)
-                .addOnCompleteListener(task -> {
-                    Story story = task.getResult();
-                    binding.topAppBar.setTitle(story.getTitle());
+        new TabLayoutMediator(binding.tabLayout, binding.viewPager, (tab, position) -> {
+            if (position == 0)
+                tab.setText(R.string.story_activity_tab_1);
+            else if(position == 1)
+                tab.setText(R.string.story_activity_tab_2);
+            else
+                throw new AssertionError("Suppose there is only two Tabs");
+        }).attach();
+    }
 
-                    List<Long> comments = story.getKids();
-                    binding.recycleView.setAdapter(new CommentRecyclerAdapter(StoryActivity.this, hackerNewsService, comments));
-                });
+    private class ScreenSlidePagerAdapter extends FragmentStateAdapter {
+        public ScreenSlidePagerAdapter(@NonNull @NotNull FragmentActivity fragmentActivity) {
+            super(fragmentActivity);
+        }
+
+        @NonNull
+        @NotNull
+        @Override
+        public Fragment createFragment(int position) {
+            if(position == 0)
+                return CommentFragment.newInstance(storyId);
+            else if(position == 1)
+                return BrowserFragment.newInstance(articleUrl);
+            else
+                throw new AssertionError("Suppose there is only two Tabs");
+        }
+
+        @Override
+        public int getItemCount() {
+            return 2;
+        }
     }
 }

@@ -31,6 +31,7 @@
             </com.google.android.material.appbar.MaterialToolbar>
 
             <com.google.android.material.tabs.TabLayout
+                android:id="@+id/tabLayout"
                 android:layout_width="match_parent"
                 app:layout_scrollFlags="scroll|enterAlways"
                 android:layout_height="wrap_content">
@@ -49,15 +50,11 @@
 
         </com.google.android.material.appbar.AppBarLayout>
 
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/recycleView"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+        <androidx.viewpager2.widget.ViewPager2
+            android:id="@+id/viewPager"
             app:layout_behavior="@string/appbar_scrolling_view_behavior"
-            tools:itemCount="10"
-            tools:listitem="@layout/comment_card_view" />
-
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"/>
 
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 

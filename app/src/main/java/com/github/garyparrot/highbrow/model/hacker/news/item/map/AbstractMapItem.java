@@ -72,7 +72,7 @@ public abstract class AbstractMapItem implements Item {
             pollOptIds = (List<Long>) MapUtility.getOrDefault(map, "parts", null);
             descendants = (long) MapUtility.getOrDefault(map, "descendants", 0L);
         } catch (NullPointerException | ClassCastException | IllegalArgumentException e) {
-            throw new IllegalArgumentException("Bad Map: " + map.toString(), e);
+            throw new IllegalArgumentException("Bad Map: " + (map == null ? "null" : map.toString()), e);
         }
     }
 
