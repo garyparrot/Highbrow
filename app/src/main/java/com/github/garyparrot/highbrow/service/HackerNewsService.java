@@ -33,4 +33,8 @@ public interface HackerNewsService {
     Task<List<Long>> showStoryIds();
     Task<List<Long>> jobStoryIDs();
 
+    @FunctionalInterface
+    interface StorySeries {
+        Task<List<Long>> call();
+    }
 }
