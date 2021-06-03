@@ -70,10 +70,13 @@ public class StoryActivity extends AppCompatActivity {
 
 
     private void setBottomSheetState(int state) {
-        if(state == BottomSheetBehavior.STATE_HIDDEN)
+        if(state == BottomSheetBehavior.STATE_HIDDEN) {
             binding.bottomSheet.setVisibility(View.GONE);
-        else
+            binding.shadow.setVisibility(View.GONE);
+        } else {
             binding.bottomSheet.setVisibility(View.VISIBLE);
+            binding.shadow.setVisibility(View.VISIBLE);
+        }
         BottomSheetBehavior<FrameLayout> behavior = BottomSheetBehavior.from(binding.bottomSheet);
         behavior.setState(state);
     }
