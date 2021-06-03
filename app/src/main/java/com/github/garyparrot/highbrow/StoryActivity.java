@@ -10,11 +10,13 @@ import androidx.viewpager2.adapter.FragmentStateAdapter;
 
 import android.content.res.Resources;
 import android.os.Bundle;
+import android.speech.tts.TextToSpeech;
 import android.view.View;
 import android.widget.FrameLayout;
 
 import com.github.garyparrot.highbrow.databinding.ActivityStoryBinding;
 import com.github.garyparrot.highbrow.event.DictionaryLookupEvent;
+import com.github.garyparrot.highbrow.event.TextToSpeechRequestEvent;
 import com.github.garyparrot.highbrow.model.hacker.news.item.Story;
 import com.github.garyparrot.highbrow.model.hacker.news.item.general.GeneralStory;
 import com.github.garyparrot.highbrow.service.HackerNewsService;
@@ -26,9 +28,12 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Locale;
+
 import javax.inject.Inject;
 
 import dagger.hilt.android.AndroidEntryPoint;
+import timber.log.Timber;
 
 @AndroidEntryPoint
 public class StoryActivity extends AppCompatActivity {
@@ -42,10 +47,19 @@ public class StoryActivity extends AppCompatActivity {
     @Inject
     HackerNewsService hackerNewsService;
 
+    @Inject
+    TextToSpeech ttsEngine;
+
     public static final String BUNDLE_STORY_JSON = "BUNDLE_STORY_JSON";
 
     private Story story;
     private ActivityStoryBinding binding;
+
+    @Subscribe
+    public void onTextToSpeechRequest(TextToSpeechRequestEvent event) {
+        ttsEngine.setLanguage(Locale.ENGLISH);
+        ttsEngine.speak(event.getSpeechText(), TextToSpeech.QUEUE_FLUSH, null, event.getSpeechText());
+    }
 
     @Subscribe
     public void onDictionaryLookup(DictionaryLookupEvent event) {
@@ -53,6 +67,7 @@ public class StoryActivity extends AppCompatActivity {
         // not visible on the screen.
         setBottomSheetState(BottomSheetBehavior.STATE_HALF_EXPANDED);
     }
+
 
     private void setBottomSheetState(int state) {
         if(state == BottomSheetBehavior.STATE_HIDDEN)
@@ -62,6 +77,7 @@ public class StoryActivity extends AppCompatActivity {
         BottomSheetBehavior<FrameLayout> behavior = BottomSheetBehavior.from(binding.bottomSheet);
         behavior.setState(state);
     }
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
