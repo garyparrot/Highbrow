@@ -16,6 +16,8 @@ import com.github.garyparrot.highbrow.layout.adapter.CommentRecyclerAdapter;
 import com.github.garyparrot.highbrow.model.hacker.news.item.Story;
 import com.github.garyparrot.highbrow.service.HackerNewsService;
 
+import org.greenrobot.eventbus.EventBus;
+
 import java.util.List;
 
 import javax.inject.Inject;
@@ -31,6 +33,9 @@ import dagger.hilt.android.AndroidEntryPoint;
 public class CommentFragment extends Fragment {
 
     public static final String BUNDLE_STORY_ID = "BUNDLE_STORY_ID";
+
+    @Inject
+    EventBus eventBus;
 
     @Inject
     HackerNewsService hackerNewsService;

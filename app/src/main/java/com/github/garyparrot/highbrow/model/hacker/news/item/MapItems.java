@@ -2,6 +2,8 @@ package com.github.garyparrot.highbrow.model.hacker.news.item;
 
 import android.util.Log;
 
+import androidx.annotation.Nullable;
+
 import com.github.garyparrot.highbrow.model.hacker.news.item.map.MapAsk;
 import com.github.garyparrot.highbrow.model.hacker.news.item.map.MapComment;
 import com.github.garyparrot.highbrow.model.hacker.news.item.map.MapJob;
@@ -29,7 +31,11 @@ public final class MapItems {
     private MapItems() {
     }
 
+    @Nullable
     public static Item itemFrom(Map<String, Object> map) {
+        if(map == null)
+            return null;
+
         Object typeObject = map.get("type");
 
         if (!(typeObject instanceof String)) {
@@ -44,7 +50,10 @@ public final class MapItems {
         return itemType.fromMap(map);
     }
 
+    @Nullable
     public static Story storyFrom(Map<String, Object> map) {
+        if(map == null)
+            return null;
         Story story = new MapStory(map);
         if(isValidItem(story)) {
             return story;
@@ -54,7 +63,10 @@ public final class MapItems {
         }
     }
 
+    @Nullable
     public static Comment commentFrom(Map<String, Object> map) {
+        if(map == null)
+            return null;
         Comment comment = new MapComment(map);
         if(isValidItem(comment)) {
             return comment;
@@ -64,7 +76,10 @@ public final class MapItems {
         }
     }
 
+    @Nullable
     public static Ask askFrom(Map<String, Object> map) {
+        if(map == null)
+            return null;
         Ask ask = new MapAsk(map);
         if(isValidItem(ask)) {
             return ask;
@@ -74,7 +89,10 @@ public final class MapItems {
         }
     }
 
+    @Nullable
     public static Job jobFrom(Map<String, Object> map) {
+        if(map == null)
+            return null;
         Job job = new MapJob(map);
         if(isValidItem(job)) {
             return job;
@@ -84,7 +102,10 @@ public final class MapItems {
         }
     }
 
+    @Nullable
     public static Poll pollFrom(Map<String, Object> map) {
+        if(map == null)
+            return null;
         Poll poll = new MapPoll(map);
         if(isValidItem(poll)) {
             return poll;
@@ -94,7 +115,10 @@ public final class MapItems {
         }
     }
 
+    @Nullable
     public static PollOpt pollOptFrom(Map<String, Object> map) {
+        if(map == null)
+            return null;
         PollOpt pollOpt = new MapPollOpt(map);
         if(isValidItem(pollOpt)) {
             return pollOpt;
@@ -106,6 +130,8 @@ public final class MapItems {
 
     public static boolean isValidItem(Item item) {
         // special case for deleted item
+        if(item == null)
+            return false;
         if(item.isDeleted()) {
             if (item.getId() <= 0) return false;
             if (item.getItemType() == null) return false;

@@ -107,6 +107,32 @@
             android:layout_height="match_parent"
             app:layout_behavior="@string/appbar_scrolling_view_behavior" />
 
+        <View
+            android:id="@+id/shadow"
+            android:layout_width="match_parent"
+            android:layout_height="16dp"
+            android:background="@drawable/shape_gradient_top_shadow"
+            app:layout_anchor="@id/bottomSheet" />
+
+        <FrameLayout
+            android:id="@+id/bottomSheet"
+            app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior"
+            style="@style/Widget.MaterialComponents.BottomSheet"
+            android:visibility="visible"
+            tools:visibility="visible"
+            app:behavior_hideable="true"
+            android:layout_width="match_parent"
+            android:layout_height="400dp">
+
+            <androidx.fragment.app.FragmentContainerView
+                android:id="@+id/fragment"
+                android:name="com.github.garyparrot.highbrow.DictionaryFragment"
+                tools:layout="@layout/fragment_dictionary"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+
+        </FrameLayout>
+
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 
 </layout>

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <data>
+        <variable
+            name="entry"
+            type="com.github.garyparrot.highbrow.model.dict.UrbanQueryEntry" />
+    </data>
+
+    <LinearLayout
+        android:id="@+id/layout"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            tools:text="Work from Home - a concept popularized from COVID-19, where everyone is self-quarantined, resulting in many working from home."
+            android:text="@{entry.definition}"
+            android:singleLine="false"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+
+
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="10dp"/>
+    </LinearLayout>
+
+</layout>

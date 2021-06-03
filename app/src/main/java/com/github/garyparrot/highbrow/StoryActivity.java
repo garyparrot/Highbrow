@@ -10,14 +10,20 @@ import androidx.viewpager2.adapter.FragmentStateAdapter;
 
 import android.content.res.Resources;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.FrameLayout;
 
 import com.github.garyparrot.highbrow.databinding.ActivityStoryBinding;
+import com.github.garyparrot.highbrow.event.DictionaryLookupEvent;
 import com.github.garyparrot.highbrow.model.hacker.news.item.Story;
 import com.github.garyparrot.highbrow.model.hacker.news.item.general.GeneralStory;
 import com.github.garyparrot.highbrow.service.HackerNewsService;
+import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.tabs.TabLayoutMediator;
 import com.google.gson.Gson;
 
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
 import org.jetbrains.annotations.NotNull;
 
 import javax.inject.Inject;
@@ -28,6 +34,9 @@ import dagger.hilt.android.AndroidEntryPoint;
 public class StoryActivity extends AppCompatActivity {
 
     @Inject
+    EventBus eventBus;
+
+    @Inject
     Gson gson;
 
     @Inject
@@ -36,17 +45,36 @@ public class StoryActivity extends AppCompatActivity {
     public static final String BUNDLE_STORY_JSON = "BUNDLE_STORY_JSON";
 
     private Story story;
+    private ActivityStoryBinding binding;
+
+    @Subscribe
+    public void onDictionaryLookup(DictionaryLookupEvent event) {
+        // When a dictionary lookup event occurred, we suppose to expand the sheet in case it is
+        // not visible on the screen.
+        setBottomSheetState(BottomSheetBehavior.STATE_HALF_EXPANDED);
+    }
+
+    private void setBottomSheetState(int state) {
+        if(state == BottomSheetBehavior.STATE_HIDDEN)
+            binding.bottomSheet.setVisibility(View.GONE);
+        else
+            binding.bottomSheet.setVisibility(View.VISIBLE);
+        BottomSheetBehavior<FrameLayout> behavior = BottomSheetBehavior.from(binding.bottomSheet);
+        behavior.setState(state);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        eventBus.register(this);
 
         Bundle bundle = getIntent().getExtras();
         story = gson.fromJson(bundle.getString(BUNDLE_STORY_JSON), GeneralStory.class);
 
-        ActivityStoryBinding binding = DataBindingUtil.setContentView(this, R.layout.activity_story);
+        binding = DataBindingUtil.setContentView(this, R.layout.activity_story);
         binding.setStory(story);
         binding.viewPager.setAdapter(new ScreenSlidePagerAdapter(this));
+        setBottomSheetState(BottomSheetBehavior.STATE_HIDDEN);
 
         new TabLayoutMediator(binding.tabLayout, binding.viewPager, (tab, position) -> {
             if (position == 0)
@@ -56,6 +84,12 @@ public class StoryActivity extends AppCompatActivity {
             else
                 throw new AssertionError("Suppose there is only two Tabs");
         }).attach();
+    }
+
+    @Override
+    protected void onStop() {
+        eventBus.unregister(this);
+        super.onStop();
     }
 
     private class ScreenSlidePagerAdapter extends FragmentStateAdapter {

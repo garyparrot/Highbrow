@@ -6,6 +6,7 @@
     <data>
         <variable name="item" type="com.github.garyparrot.highbrow.model.hacker.news.item.Comment" />
         <variable name="number" type="java.lang.Integer" />
+        <import type="android.view.View"/>
         <import type="com.github.garyparrot.highbrow.layout.present.ItemPresenter"/>
         <import type="android.text.Html"/>
     </data>
@@ -21,6 +22,8 @@
 
         <LinearLayout
             android:orientation="vertical"
+            android:layout_gravity=""
+            android:visibility="@{item == null ? View.GONE : View.VISIBLE}"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             >
@@ -33,7 +36,7 @@
 
                 <com.google.android.material.textview.MaterialTextView
                     android:id="@+id/textViewAuthor"
-                    android:text="@{item.author}"
+                    android:text="@{item != null ? item.author: ``}"
                     tools:text="garyparrot"
                     style="@style/TextAppearance.MaterialComponents.Subtitle2"
                     app:layout_constraintTop_toTopOf="parent"
@@ -44,7 +47,7 @@
 
                 <com.google.android.material.textview.MaterialTextView
                     android:id="@+id/textViewTime"
-                    android:text="@{ItemPresenter.getPastedTime(item.time)}"
+                    android:text="@{ItemPresenter.getPastedTime(item != null ? item.time : 0)}"
                     tools:text="3d"
                     style="@style/TextAppearance.MaterialComponents.Subtitle2"
                     app:layout_constraintTop_toTopOf="parent"
@@ -54,11 +57,13 @@
                     />
 
                 <com.google.android.material.textview.MaterialTextView
+                    android:id="@+id/commentText"
                     style="@style/TextAppearance.MdcTypographyStyles.Body3"
+                    android:textIsSelectable="true"
                     app:layout_constraintTop_toBottomOf="@id/textViewAuthor"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@{Html.fromHtml(item.text)}"
+                    android:text="@{Html.fromHtml(item != null ? item.text : ``)}"
                     tools:text="@string/lorem"
                     />
 

@@ -91,6 +91,7 @@ public class CommentRecyclerAdapter extends RecyclerView.Adapter<CommentRecycler
                         Comment targetComment = task.getResult();
                         holder.setComment(targetComment);
                     }
+
                 });
     }
 
