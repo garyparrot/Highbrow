@@ -11,6 +11,7 @@ import androidx.viewpager2.adapter.FragmentStateAdapter;
 import android.content.res.Resources;
 import android.os.Bundle;
 import android.speech.tts.TextToSpeech;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.FrameLayout;
 
@@ -68,7 +69,6 @@ public class StoryActivity extends AppCompatActivity {
         setBottomSheetState(BottomSheetBehavior.STATE_HALF_EXPANDED);
     }
 
-
     private void setBottomSheetState(int state) {
         if(state == BottomSheetBehavior.STATE_HIDDEN) {
             binding.bottomSheet.setVisibility(View.GONE);
@@ -94,6 +94,7 @@ public class StoryActivity extends AppCompatActivity {
         binding.setStory(story);
         binding.viewPager.setAdapter(new ScreenSlidePagerAdapter(this));
         setBottomSheetState(BottomSheetBehavior.STATE_HIDDEN);
+        binding.topAppBar.setNavigationOnClickListener((view) -> this.finish());
 
         new TabLayoutMediator(binding.tabLayout, binding.viewPager, (tab, position) -> {
             if (position == 0)
