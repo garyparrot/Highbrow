@@ -87,6 +87,10 @@ public class DictionaryFragment extends Fragment {
     }
 
     private void doQuery(String text) {
+        if(text == null) {
+            Timber.w("Ignore a null query");
+            return;
+        }
         urbanDictionaryService.query(text)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -106,7 +110,8 @@ public class DictionaryFragment extends Fragment {
         if (getArguments() != null) {
             text = getArguments().getString(ARG_TEXT);
         }
-        doQuery(text);
+        if(text != null)
+            setText(text);
     }
 
     @Override
