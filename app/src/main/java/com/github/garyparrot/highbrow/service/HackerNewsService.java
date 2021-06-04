@@ -12,6 +12,8 @@ import com.google.android.gms.tasks.Task;
 
 import java.util.List;
 
+import javax.net.ssl.SSLEngine;
+
 public interface HackerNewsService {
 
     Task<Item> getItem(long id);
@@ -37,4 +39,5 @@ public interface HackerNewsService {
     interface StorySeries {
         Task<List<Long>> call();
     }
+
 }

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <group
+        android:id="@+id/stories"
+        android:checkableBehavior="single"
+        >
+
+        <item
+            android:id="@+id/topStories"
+            android:icon="@drawable/ic_baseline_trending_up_24"
+            android:title="Top Stories"/>
+        <item
+            android:id="@+id/newStories"
+            android:icon="@drawable/ic_baseline_fiber_new_24"
+            android:title="New Stories"/>
+        <item
+            android:id="@+id/bestStories"
+            android:icon="@drawable/ic_baseline_thumb_up_24"
+            android:title="Best Stories"/>
+        <item
+            android:id="@+id/askStories"
+            android:icon="@drawable/ic_baseline_question_answer_24"
+            android:title="Ask Stories"/>
+        <item
+            android:id="@+id/showStories"
+            android:icon="@drawable/ic_baseline_record_voice_over_24"
+            android:title="Show Stories"/>
+        <item
+            android:id="@+id/jobStories"
+            android:icon="@drawable/ic_baseline_work_24"
+            android:title="Job Stories"/>
+
+    </group>
+
+</menu>
