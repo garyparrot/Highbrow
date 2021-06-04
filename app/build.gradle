@@ -16,6 +16,13 @@ android {
         versionName "1.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+
+
+        javaCompileOptions {
+            annotationProcessorOptions {
+                arguments += ["room.schemaLocation": "$projectDir/schemas".toString()]
+            }
+        }
     }
 
     buildTypes {
@@ -52,11 +59,14 @@ dependencies {
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
     implementation 'com.squareup.okhttp3:logging-interceptor:5.0.0-alpha.2'
     implementation 'org.greenrobot:eventbus:3.2.0'
+    implementation 'androidx.room:room-rxjava3:2.3.0'
+    implementation 'androidx.room:room-runtime:2.3.0'
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.2'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
     annotationProcessor 'org.projectlombok:lombok:1.18.20'
     annotationProcessor 'com.google.dagger:hilt-android-compiler:2.36'
+    annotationProcessor 'androidx.room:room-compiler:2.3.0'
     //noinspection AnnotationProcessorOnCompilePath
     compileOnly 'org.projectlombok:lombok:1.18.20'
 }

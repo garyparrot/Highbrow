@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <group
         android:id="@+id/stories"
@@ -19,17 +20,24 @@
             android:icon="@drawable/ic_baseline_thumb_up_24"
             android:title="Best Stories"/>
         <item
+            app:showAsAction="collapseActionView"
             android:id="@+id/askStories"
             android:icon="@drawable/ic_baseline_question_answer_24"
             android:title="Ask Stories"/>
         <item
+            app:showAsAction="collapseActionView"
             android:id="@+id/showStories"
             android:icon="@drawable/ic_baseline_record_voice_over_24"
             android:title="Show Stories"/>
         <item
+            app:showAsAction="collapseActionView"
             android:id="@+id/jobStories"
             android:icon="@drawable/ic_baseline_work_24"
             android:title="Job Stories"/>
+        <item
+            android:id="@+id/savedStories"
+            android:icon="@drawable/ic_baseline_star_24"
+            android:title="Saved Stories"/>
 
     </group>
 

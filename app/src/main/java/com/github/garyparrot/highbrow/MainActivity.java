@@ -1,33 +1,57 @@
 package com.github.garyparrot.highbrow;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.databinding.DataBindingUtil;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
+import android.graphics.Canvas;
+import android.graphics.Paint;
 import android.os.Bundle;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.Toast;
 
 import com.github.garyparrot.highbrow.databinding.ActivityMainBinding;
 import com.github.garyparrot.highbrow.layout.adapter.StoryRecyclerAdapter;
+import com.github.garyparrot.highbrow.layout.view.StoryItem;
+import com.github.garyparrot.highbrow.model.hacker.news.item.Story;
 import com.github.garyparrot.highbrow.module.FirebaseDatabaseModule;
+import com.github.garyparrot.highbrow.room.HighbrowDatabase;
+import com.github.garyparrot.highbrow.room.dao.SavedStoryDao;
+import com.github.garyparrot.highbrow.room.entity.SavedStory;
 import com.github.garyparrot.highbrow.service.HackerNewsService;
 import com.github.garyparrot.highbrow.util.LogUtility;
+import com.github.garyparrot.highbrow.util.SaveResult;
 import com.google.android.gms.tasks.Task;
+import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.google.gson.Gson;
 
-import java.util.HashMap;
+import org.greenrobot.eventbus.Subscribe;
+import org.jetbrains.annotations.NotNull;
+
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
+import java.util.concurrent.ExecutorService;
 
 import javax.inject.Inject;
 
 import dagger.hilt.android.AndroidEntryPoint;
+import dagger.hilt.processor.internal.definecomponent.codegen._dagger_hilt_android_internal_builders_FragmentComponentBuilder;
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
+import io.reactivex.rxjava3.core.CompletableObserver;
+import io.reactivex.rxjava3.core.Maybe;
+import io.reactivex.rxjava3.core.Observer;
+import io.reactivex.rxjava3.core.Single;
+import io.reactivex.rxjava3.schedulers.Schedulers;
 import timber.log.Timber;
 
 @AndroidEntryPoint
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity{
 
     @Inject
     @FirebaseDatabaseModule.HackerNews
@@ -35,6 +59,9 @@ public class MainActivity extends AppCompatActivity {
 
     @Inject
     HackerNewsService hackerNewsService;
+
+    @Inject
+    HighbrowDatabase database;
 
     @Inject
     Gson gson;
@@ -53,9 +80,43 @@ public class MainActivity extends AppCompatActivity {
         binding.swipeRefreshLayout.setOnRefreshListener(this::onRefresh);
         binding.topAppBar.setNavigationOnClickListener((view) -> binding.drawerLayout.openDrawer(binding.navigationView));
         binding.navigationView.setNavigationItemSelectedListener(this::onNavigationViewItemSelected);
-
         binding.navigationView.getMenu().findItem(R.id.topStories).setChecked(true);
         switchStorySeries(hackerNewsService::topStoryIds);
+
+        setupItemTouchHelper();
+    }
+
+    private void setupItemTouchHelper() {
+        new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.RIGHT) {
+            @Override
+            public boolean onMove(@NonNull @NotNull RecyclerView recyclerView, @NonNull @NotNull RecyclerView.ViewHolder viewHolder, @NonNull @NotNull RecyclerView.ViewHolder target) {
+                return false;
+            }
+            @Override
+            public void onSwiped(@NonNull @NotNull RecyclerView.ViewHolder viewHolder, int direction) {
+                binding.recycleView.getAdapter().notifyItemChanged(viewHolder.getAdapterPosition());
+
+                // Get the story from the View object
+                Story story = ((StoryItem) viewHolder.itemView).getStory();
+                SavedStory savedStory = SavedStory.from(story);
+
+                // Save it into DB if story not exists yet, otherwise delete it.
+                database.savedStory().isSavedStoryExists(story.getId())
+                        .subscribeOn(Schedulers.io())
+                        .flatMapMaybe((b) -> {
+                            if(b)
+                                return database.savedStory().delete(savedStory)
+                                            .andThen(Maybe.just(SaveResult.UNSAVED));
+                            else
+                                return database.savedStory().insert(savedStory)
+                                            .andThen(Maybe.just(SaveResult.SAVED));
+                        })
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe((res) -> {
+                            Toast.makeText(MainActivity.this, res.toString(), Toast.LENGTH_SHORT).show();
+                        });
+            }
+        }).attachToRecyclerView(binding.recycleView);
     }
 
     private boolean onNavigationViewItemSelected(MenuItem menuItem) {
@@ -73,6 +134,20 @@ public class MainActivity extends AppCompatActivity {
             switchStorySeries(hackerNewsService::showStoryIds);
         else if(menuItem.getItemId() == R.id.jobStories)
             switchStorySeries(hackerNewsService::jobStoryIDs);
+        else if(menuItem.getItemId() == R.id.savedStories) {
+            database.savedStory().findAll()
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe((list) -> {
+                        List<Long> idList = new ArrayList<Long>();
+                        for (SavedStory savedStory : list) {
+                            idList.add(savedStory.getId());
+                        }
+                        switchStorySeries(() -> Tasks.forResult(idList));
+                    }, (e) -> {
+                        e.printStackTrace();
+                    });
+        }
 
         binding.drawerLayout.closeDrawer(binding.navigationView);
         return true;

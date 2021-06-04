@@ -12,16 +12,19 @@
     </data>
 
     <androidx.coordinatorlayout.widget.CoordinatorLayout
+        android:fitsSystemWindows="true"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         tools:context=".StoryActivity">
 
         <com.google.android.material.appbar.AppBarLayout
+            android:fitsSystemWindows="true"
             app:liftOnScroll="true"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
             <com.google.android.material.appbar.MaterialToolbar
+                android:fitsSystemWindows="true"
                 android:id="@+id/topAppBar"
                 app:navigationIcon="@drawable/ic_baseline_arrow_back_24"
                 android:elevation="0dp"
