@@ -1,7 +1,10 @@
 package com.github.garyparrot.highbrow.layout.present;
 
+import android.text.Html;
+import android.text.Spanned;
 import android.view.View;
 
+import com.github.garyparrot.highbrow.model.hacker.news.item.Comment;
 import com.github.garyparrot.highbrow.model.hacker.news.item.Story;
 
 import java.net.URI;
@@ -11,6 +14,12 @@ public class ItemPresenter {
 
     public static String toScoreString(Story item) {
         return String.format(Locale.ENGLISH, "%dp",item.getScore());
+    }
+
+    public static CharSequence renderText(Comment comment, boolean fold) {
+        if(comment == null || comment.getText() == null)
+            return "";
+        return Html.fromHtml(comment.getText());
     }
 
     public static String toNumberFormat(int number) {

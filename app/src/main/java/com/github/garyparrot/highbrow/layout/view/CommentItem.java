@@ -1,16 +1,19 @@
 package com.github.garyparrot.highbrow.layout.view;
 
+import android.animation.ValueAnimator;
 import android.content.Context;
-import android.util.TypedValue;
 import android.view.ActionMode;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.FrameLayout;
+import android.widget.LinearLayout;
 
 import androidx.annotation.NonNull;
 
+import com.github.garyparrot.highbrow.R;
 import com.github.garyparrot.highbrow.databinding.CommentCardViewBinding;
 import com.github.garyparrot.highbrow.event.DictionaryLookupEvent;
 import com.github.garyparrot.highbrow.event.TextToSpeechRequestEvent;
@@ -28,6 +31,7 @@ import javax.inject.Inject;
 import dagger.hilt.android.AndroidEntryPoint;
 import timber.log.Timber;
 
+
 @AndroidEntryPoint
 public class CommentItem extends FrameLayout {
 
@@ -39,6 +43,8 @@ public class CommentItem extends FrameLayout {
     private boolean isIndentEnabled;
     private CommentCardViewBinding binding;
     private List<CommentItem> childComments;
+    private boolean isToolBarFold = true;
+    private boolean isCardFolded = false;
 
     public CommentItem(@NonNull Context context) {
         super(context);
@@ -46,9 +52,61 @@ public class CommentItem extends FrameLayout {
         inflateView();
         childComments = new ArrayList<>();
     }
+
+    private void setCardFolded(boolean folded) {
+        this.isCardFolded = folded;
+        binding.setFold(this.isCardFolded);
+
+        ViewGroup.LayoutParams layoutParams = binding.commentToolBar.getLayoutParams();
+        ViewGroup.LayoutParams params = new LinearLayout.LayoutParams(layoutParams.width, 0);
+        binding.commentToolBar.setLayoutParams(params);
+    }
+
     private void inflateView() {
         binding = CommentCardViewBinding.inflate(LayoutInflater.from(getContext()), this, true);
         binding.commentText.setCustomSelectionActionModeCallback(getCallback());
+        binding.card.setOnClickListener(this::onCardClicked);
+        binding.card.setOnLongClickListener(this::onLongClick);
+    }
+
+    private boolean onLongClick(View view) {
+        setCardFolded(!isCardFolded);
+        return true;
+    }
+
+    private void onCardClicked(View view) {
+
+        // if the card is folded, unfold it first
+        if(isCardFolded) {
+            setCardFolded(false);
+            return;
+        }
+
+        // Apply animation on the toolbar layout
+        float targetHeight = getResources().getDimension(R.dimen.commentToolBarHeight);
+        if(isToolBarFold) {
+            ValueAnimator animator = ValueAnimator.ofFloat(0, targetHeight);
+            animator.addUpdateListener((valueAnimator) -> {
+                float value = (float) valueAnimator.getAnimatedValue();
+                ViewGroup.LayoutParams layoutParams = binding.commentToolBar.getLayoutParams();
+                ViewGroup.LayoutParams params = new LinearLayout.LayoutParams(layoutParams.width, (int)value);
+                binding.commentToolBar.setLayoutParams(params);
+            });
+            animator.setDuration(300);
+            animator.start();
+            isToolBarFold = !isToolBarFold;
+        } else {
+            ValueAnimator animator = ValueAnimator.ofFloat(targetHeight, 0);
+            animator.addUpdateListener((valueAnimator) -> {
+                float value = (float) valueAnimator.getAnimatedValue();
+                ViewGroup.LayoutParams layoutParams = binding.commentToolBar.getLayoutParams();
+                ViewGroup.LayoutParams params = new LinearLayout.LayoutParams(layoutParams.width, (int)value);
+                binding.commentToolBar.setLayoutParams(params);
+            });
+            animator.setDuration(300);
+            animator.start();
+            isToolBarFold = !isToolBarFold;
+        }
     }
 
     private ActionMode.Callback getCallback() {
@@ -160,9 +218,9 @@ public class CommentItem extends FrameLayout {
     public void setIndentEnabled(boolean isEnabled) {
         this.isIndentEnabled = isEnabled;
         if(isEnabled)
-            binding.commentIndent.setVisibility(View.VISIBLE);
+            binding.topLevelLinearLayout.setPadding((int)getResources().getDimension(R.dimen.commentIndent), 0, 0, 0);
         else
-            binding.commentIndent.setVisibility(View.GONE);
+            binding.topLevelLinearLayout.setPadding(0,0,0,0);
     }
     public void addChildCommentToLayout(CommentItem commentItem) {
         childComments.add(commentItem);

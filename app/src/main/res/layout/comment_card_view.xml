@@ -6,22 +6,17 @@
     <data>
         <variable name="item" type="com.github.garyparrot.highbrow.model.hacker.news.item.Comment" />
         <variable name="number" type="java.lang.Integer" />
+        <variable name="fold" type="java.lang.Boolean" />
         <import type="android.view.View"/>
         <import type="com.github.garyparrot.highbrow.layout.present.ItemPresenter"/>
         <import type="android.text.Html"/>
     </data>
 
     <LinearLayout
-        android:orientation="horizontal"
+        android:id="@+id/topLevelLinearLayout"
+        android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
-
-        <Space
-            android:id="@+id/commentIndent"
-            android:visibility="gone"
-            tools:visibility="gone"
-            android:layout_width="15dp"
-            android:layout_height="match_parent"/>
 
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/card"
@@ -71,31 +66,57 @@
                     <com.google.android.material.textview.MaterialTextView
                         android:id="@+id/commentText"
                         style="@style/TextAppearance.MdcTypographyStyles.Body3"
-                        android:textIsSelectable="true"
+                        android:textIsSelectable="false"
+                        android:ellipsize="end"
+                        android:maxLines="@{fold ? 1 : 1000}"
                         app:layout_constraintTop_toBottomOf="@id/textViewAuthor"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="@{Html.fromHtml(item != null ? item.text : ``)}"
+                        android:text="@{ItemPresenter.renderText(item, fold)}"
                         tools:text="@string/lorem"
                         />
 
                 </androidx.constraintlayout.widget.ConstraintLayout>
+
+                <LinearLayout
+                    android:id="@+id/commentToolBar"
+                    android:layout_width="match_parent"
+                    android:gravity="end"
+                    android:layout_height="0dp"
+                    android:orientation="horizontal">
+
+                    <com.google.android.material.button.MaterialButton
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        app:cornerRadius="0dp"
+                        app:icon="@drawable/ic_baseline_star_24"
+                        style="@style/Widget.App.Button.OutlinedButton.IconOnly"/>
+
+                    <com.google.android.material.button.MaterialButton
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        app:cornerRadius="0dp"
+                        app:icon="@drawable/ic_baseline_share_24"
+                        style="@style/Widget.App.Button.OutlinedButton.IconOnly"/>
+
+                </LinearLayout>
 
                 <View
                     android:layout_width="match_parent"
                     android:layout_height="1dp"
                     android:background="#cccccc"/>
 
-                <LinearLayout
-                    android:id="@+id/childCommentLinearLayout"
-                    android:orientation="vertical"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
-                </LinearLayout>
-
             </LinearLayout>
 
         </com.google.android.material.card.MaterialCardView>
+
+        <LinearLayout
+            android:id="@+id/childCommentLinearLayout"
+            android:orientation="vertical"
+            android:visibility="@{fold ? View.GONE : View.VISIBLE}"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+        </LinearLayout>
 
     </LinearLayout>
 
