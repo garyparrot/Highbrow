@@ -7,4 +7,6 @@
     <color name="teal_700">#FF018786</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="ATTEMPT_UNSAVE_STORY_COLOR">#FF4A3C</color>
+    <color name="ATTEMPT_STORY_COLOR">#1BCC0E</color>
 </resources>

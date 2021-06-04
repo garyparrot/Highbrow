@@ -10,8 +10,10 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.github.garyparrot.highbrow.StoryActivity;
 import com.github.garyparrot.highbrow.layout.view.StoryItem;
 import com.github.garyparrot.highbrow.model.hacker.news.item.Story;
+import com.github.garyparrot.highbrow.room.dao.SavedStoryDao;
 import com.github.garyparrot.highbrow.service.HackerNewsService;
 import com.github.garyparrot.highbrow.util.MockItem;
+import com.github.garyparrot.highbrow.util.SaveResult;
 import com.google.gson.Gson;
 
 import org.jetbrains.annotations.NotNull;
@@ -19,12 +21,16 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 
 import dagger.hilt.android.AndroidEntryPoint;
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
+import io.reactivex.rxjava3.schedulers.Schedulers;
+import timber.log.Timber;
 
 public class StoryRecyclerAdapter extends RecyclerView.Adapter<StoryRecyclerAdapter.ViewHolder> {
 
     private static int nextRequestId = 0;
     private final List<Long> targetIds;
     private final HackerNewsService hackerNews;
+    private final SavedStoryDao savedStoryDao;
     private final Context context;
     private final Gson gson;
 
@@ -32,8 +38,9 @@ public class StoryRecyclerAdapter extends RecyclerView.Adapter<StoryRecyclerAdap
         return nextRequestId++;
     }
 
-    public StoryRecyclerAdapter(Context context, HackerNewsService service, List<Long> targets, Gson gson) {
+    public StoryRecyclerAdapter(Context context, HackerNewsService service, SavedStoryDao dao, List<Long> targets, Gson gson) {
         this.context = context;
+        this.savedStoryDao = dao;
         hackerNews = service;
         targetIds = targets;
         this.gson = gson;
@@ -43,6 +50,7 @@ public class StoryRecyclerAdapter extends RecyclerView.Adapter<StoryRecyclerAdap
 
         private volatile int currentRequestId;
         private final StoryItem item;
+        private boolean isSaved;
 
         public ViewHolder(StoryItem item) {
             super(item);
@@ -56,6 +64,11 @@ public class StoryRecyclerAdapter extends RecyclerView.Adapter<StoryRecyclerAdap
             return currentRequestId;
         }
 
+        public boolean getSaved() { return this.isSaved; }
+        public void setSaved(boolean isSaved) { this.isSaved = isSaved; }
+        public SaveResult getSavedResult() {
+            return isSaved ? SaveResult.SAVED : SaveResult.UNSAVED;
+        }
         void setNumber(int number) {
             item.setNumber(number);
         }
@@ -99,7 +112,20 @@ public class StoryRecyclerAdapter extends RecyclerView.Adapter<StoryRecyclerAdap
                     // Test to see if the view holder in this moment point to the right data
                     if(holder.getCurrentRequestId() == requestId) {
                         Story targetStory = task.getResult();
+                        if(targetStory == null) {
+                            Timber.e("Bad story at id %d", targetIds.get(position));
+                            return;
+                        }
                         holder.setStory(targetStory);
+
+                        // Update saved info
+                        savedStoryDao.isSavedStoryExists(targetIds.get(position))
+                                .subscribeOn(Schedulers.io())
+                                .observeOn(AndroidSchedulers.mainThread())
+                                .subscribe((isSaved) -> {
+                                    if(holder.getCurrentRequestId() == requestId)
+                                        holder.setSaved(isSaved);
+                                }, Throwable::printStackTrace);
                     }
                 });
     }

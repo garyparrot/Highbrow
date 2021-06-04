@@ -1,6 +1,7 @@
 package com.github.garyparrot.highbrow;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.databinding.DataBindingUtil;
 import androidx.recyclerview.widget.ItemTouchHelper;
@@ -8,10 +9,10 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.graphics.Canvas;
-import android.graphics.Paint;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.github.garyparrot.highbrow.databinding.ActivityMainBinding;
@@ -20,7 +21,6 @@ import com.github.garyparrot.highbrow.layout.view.StoryItem;
 import com.github.garyparrot.highbrow.model.hacker.news.item.Story;
 import com.github.garyparrot.highbrow.module.FirebaseDatabaseModule;
 import com.github.garyparrot.highbrow.room.HighbrowDatabase;
-import com.github.garyparrot.highbrow.room.dao.SavedStoryDao;
 import com.github.garyparrot.highbrow.room.entity.SavedStory;
 import com.github.garyparrot.highbrow.service.HackerNewsService;
 import com.github.garyparrot.highbrow.util.LogUtility;
@@ -28,27 +28,19 @@ import com.github.garyparrot.highbrow.util.SaveResult;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
 import com.google.gson.Gson;
 
-import org.greenrobot.eventbus.Subscribe;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
 
 import javax.inject.Inject;
 
 import dagger.hilt.android.AndroidEntryPoint;
-import dagger.hilt.processor.internal.definecomponent.codegen._dagger_hilt_android_internal_builders_FragmentComponentBuilder;
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
-import io.reactivex.rxjava3.core.CompletableObserver;
 import io.reactivex.rxjava3.core.Maybe;
-import io.reactivex.rxjava3.core.Observer;
-import io.reactivex.rxjava3.core.Single;
 import io.reactivex.rxjava3.schedulers.Schedulers;
-import timber.log.Timber;
 
 @AndroidEntryPoint
 public class MainActivity extends AppCompatActivity{
@@ -88,6 +80,60 @@ public class MainActivity extends AppCompatActivity{
 
     private void setupItemTouchHelper() {
         new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.RIGHT) {
+
+            private View getForegroundView(RecyclerView.ViewHolder vh) {
+                return ((StoryRecyclerAdapter.ViewHolder) vh).itemView.findViewById(R.id.foregroundFrame);
+            }
+
+            private TextView getScrollLeftHintTextView(RecyclerView.ViewHolder vh){
+                return vh.itemView.findViewById(R.id.textViewScrollLeftHint);
+            }
+
+            private StoryRecyclerAdapter.ViewHolder getCustomViewHolder(RecyclerView.ViewHolder vh) {
+                return ((StoryRecyclerAdapter.ViewHolder) vh);
+            }
+
+            private void setScrollHintTextStyle(RecyclerView.ViewHolder vh) {
+                StoryRecyclerAdapter.ViewHolder customViewHolder = getCustomViewHolder(vh);
+                SaveResult currentSaveResult = customViewHolder.getSavedResult();
+                TextView textView = getScrollLeftHintTextView(vh);
+                switch (currentSaveResult) {
+                    case SAVED:
+                        textView.setText(SaveResult.UNSAVED.getActionInfo());
+                        textView.setTextColor(getResources().getColor(R.color.ATTEMPT_UNSAVE_STORY_COLOR));
+                        break;
+                    case UNSAVED:
+                        textView.setText(SaveResult.SAVED.getActionInfo());
+                        textView.setTextColor(getResources().getColor(R.color.ATTEMPT_STORY_COLOR));
+                        break;
+                }
+            }
+
+            @Override
+            public void onSelectedChanged(@Nullable @org.jetbrains.annotations.Nullable RecyclerView.ViewHolder viewHolder, int actionState) {
+                if(viewHolder != null) {
+                    getDefaultUIUtil().onSelected(getForegroundView(viewHolder));
+                    setScrollHintTextStyle(viewHolder);
+                }
+            }
+
+            @Override
+            public void clearView(@NonNull @NotNull RecyclerView recyclerView, @NonNull @NotNull RecyclerView.ViewHolder viewHolder) {
+                getDefaultUIUtil().clearView(getForegroundView(viewHolder));
+            }
+
+            @Override
+            public void onChildDraw(@NonNull @NotNull Canvas c, @NonNull @NotNull RecyclerView recyclerView, @NonNull @NotNull RecyclerView.ViewHolder viewHolder, float dX, float dY, int actionState, boolean isCurrentlyActive) {
+                getDefaultUIUtil().onDraw(c, recyclerView, getForegroundView(viewHolder), dX, dY,
+                        actionState, isCurrentlyActive);
+            }
+
+            @Override
+            public void onChildDrawOver(@NonNull @NotNull Canvas c, @NonNull @NotNull RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, float dX, float dY, int actionState, boolean isCurrentlyActive) {
+                getDefaultUIUtil().onDrawOver(c, recyclerView, getForegroundView(viewHolder), dX, dY,
+                        actionState, isCurrentlyActive);
+            }
+
             @Override
             public boolean onMove(@NonNull @NotNull RecyclerView recyclerView, @NonNull @NotNull RecyclerView.ViewHolder viewHolder, @NonNull @NotNull RecyclerView.ViewHolder target) {
                 return false;
@@ -113,6 +159,8 @@ public class MainActivity extends AppCompatActivity{
                         })
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe((res) -> {
+                            StoryRecyclerAdapter.ViewHolder customViewHolder = getCustomViewHolder(viewHolder);
+                            customViewHolder.setSaved(!customViewHolder.getSaved());
                             Toast.makeText(MainActivity.this, res.toString(), Toast.LENGTH_SHORT).show();
                         });
             }
@@ -158,7 +206,7 @@ public class MainActivity extends AppCompatActivity{
         return seriesMethod.call()
                 .addOnCompleteListener(task -> {
                     List<Long> series = task.getResult();
-                    StoryRecyclerAdapter newAdapter = new StoryRecyclerAdapter(this, hackerNewsService, series, gson);
+                    StoryRecyclerAdapter newAdapter = new StoryRecyclerAdapter(this, hackerNewsService, database.savedStory(), series, gson);
                     binding.recycleView.setAdapter(newAdapter);
                 });
     }

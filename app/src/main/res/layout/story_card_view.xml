@@ -9,115 +9,143 @@
         <import type="com.github.garyparrot.highbrow.layout.present.ItemPresenter"/>
     </data>
 
-    <com.google.android.material.card.MaterialCardView
-        android:id="@+id/card"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:cardCornerRadius="0dp"
-        android:clickable="true"
-        android:focusable="true"
-        >
+    <FrameLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
 
-        <androidx.constraintlayout.widget.ConstraintLayout
+        <RelativeLayout
+            android:id="@+id/backgroundFrame"
+            android:layout_gravity="center_vertical"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:layout_marginLeft="20dp"
+                android:id="@+id/textViewScrollLeftHint"
+                android:text="SAVE STORY"
+                style="@style/TextAppearance.MaterialComponents.Subtitle2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/foregroundFrame"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
-            <LinearLayout
-                android:id="@+id/headerBlock"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintBottom_toBottomOf="parent"
-                android:background="#dddddd"
-                android:paddingTop="10dp"
-                android:paddingBottom="10dp"
-                android:paddingLeft="5dp"
-                android:paddingRight="5dp"
-                android:gravity="center"
-                android:orientation="vertical"
-                android:layout_width="50dp"
-                android:layout_height="0dp">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@{ItemPresenter.toNumberFormat(number)}"
-                    tools:text="1"/>
-
-                <TextView
-                    style="@style/TextAppearance.MdcTypographyStyles.decoration"
-                    android:textAllCaps="false"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@{ItemPresenter.toScoreString(item)}"
-                    tools:text="300p"
-                    />
-
-            </LinearLayout>
-
-            <androidx.constraintlayout.widget.ConstraintLayout
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintLeft_toRightOf="@id/headerBlock"
-                app:layout_constraintRight_toRightOf="parent"
-                android:paddingTop="5dp"
-                android:paddingBottom="5dp"
-                android:layout_marginLeft="4dp"
-                android:layout_marginRight="4dp"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content">
-
-                <TextView
-                    android:id="@+id/title"
-                    style="@style/TextAppearance.MdcTypographyStyles.Subtitle1"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:layout_constraintLeft_toLeftOf="parent"
-                    app:layout_constraintRight_toRightOf="parent"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:text="@{item.getTitle()}"
-                    tools:text="Advice for Junior Developers" />
-
-                <TextView
-                    android:id="@+id/domainName"
-                    app:layout_constraintTop_toBottomOf="@id/title"
-                    app:layout_constraintLeft_toLeftOf="parent"
-                    app:layout_constraintRight_toRightOf="parent"
-                    android:layout_marginTop="2dp"
-                    android:layout_marginBottom="2dp"
-                    style="@style/TextAppearance.MdcTypographyStyles.decoration"
-                    android:text="@{ItemPresenter.getDomainName(item.getUrl())}"
-                    tools:text="news.ycombinator.com"
-                    android:singleLine="true"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"/>
-
-                <TextView
-                    android:id="@+id/information"
-                    style="@style/TextAppearance.MdcTypographyStyles.decoration"
-                    app:layout_constraintTop_toBottomOf="@id/domainName"
-                    app:layout_constraintLeft_toLeftOf="parent"
-                    app:layout_constraintRight_toRightOf="parent"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    android:layout_marginTop="2dp"
-                    android:layout_marginBottom="2dp"
-                    android:text="@{ItemPresenter.getInformation(item)}"
-                    tools:text="3h - by garyparrot"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"/>
-
-            </androidx.constraintlayout.widget.ConstraintLayout>
-
-            <View
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/card"
                 android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:background="#cccccc"
-                app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintRight_toRightOf="parent"
-                app:layout_constraintBottom_toBottomOf="parent"
-                />
+                android:layout_height="wrap_content"
+                app:cardCornerRadius="0dp"
+                android:clickable="true"
+                android:focusable="true"
+                >
 
-        </androidx.constraintlayout.widget.ConstraintLayout>
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
 
-    </com.google.android.material.card.MaterialCardView>
+                    <LinearLayout
+                        android:id="@+id/headerBlock"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintLeft_toLeftOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        android:background="#dddddd"
+                        android:paddingTop="10dp"
+                        android:paddingBottom="10dp"
+                        android:paddingLeft="5dp"
+                        android:paddingRight="5dp"
+                        android:gravity="center"
+                        android:orientation="vertical"
+                        android:layout_width="50dp"
+                        android:layout_height="0dp">
 
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@{ItemPresenter.toNumberFormat(number)}"
+                            tools:text="1"/>
+
+                        <TextView
+                            style="@style/TextAppearance.MdcTypographyStyles.decoration"
+                            android:textAllCaps="false"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@{ItemPresenter.toScoreString(item)}"
+                            tools:text="300p"
+                            />
+
+                    </LinearLayout>
+
+                    <androidx.constraintlayout.widget.ConstraintLayout
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintLeft_toRightOf="@id/headerBlock"
+                        app:layout_constraintRight_toRightOf="parent"
+                        android:paddingTop="5dp"
+                        android:paddingBottom="5dp"
+                        android:layout_marginLeft="4dp"
+                        android:layout_marginRight="4dp"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content">
+
+                        <TextView
+                            android:id="@+id/title"
+                            style="@style/TextAppearance.MdcTypographyStyles.Subtitle1"
+                            app:layout_constraintTop_toTopOf="parent"
+                            app:layout_constraintLeft_toLeftOf="parent"
+                            app:layout_constraintRight_toRightOf="parent"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:text="@{item.getTitle()}"
+                            tools:text="Advice for Junior Developers" />
+
+                        <TextView
+                            android:id="@+id/domainName"
+                            app:layout_constraintTop_toBottomOf="@id/title"
+                            app:layout_constraintLeft_toLeftOf="parent"
+                            app:layout_constraintRight_toRightOf="parent"
+                            android:layout_marginTop="2dp"
+                            android:layout_marginBottom="2dp"
+                            style="@style/TextAppearance.MdcTypographyStyles.decoration"
+                            android:text="@{ItemPresenter.getDomainName(item.getUrl())}"
+                            tools:text="news.ycombinator.com"
+                            android:singleLine="true"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"/>
+
+                        <TextView
+                            android:id="@+id/information"
+                            style="@style/TextAppearance.MdcTypographyStyles.decoration"
+                            app:layout_constraintTop_toBottomOf="@id/domainName"
+                            app:layout_constraintLeft_toLeftOf="parent"
+                            app:layout_constraintRight_toRightOf="parent"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            android:layout_marginTop="2dp"
+                            android:layout_marginBottom="2dp"
+                            android:text="@{ItemPresenter.getInformation(item)}"
+                            tools:text="3h - by garyparrot"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"/>
+
+                    </androidx.constraintlayout.widget.ConstraintLayout>
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="#cccccc"
+                        app:layout_constraintLeft_toLeftOf="parent"
+                        app:layout_constraintRight_toRightOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        />
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+            </com.google.android.material.card.MaterialCardView>
+
+        </RelativeLayout>
+
+    </FrameLayout>
 </layout>
