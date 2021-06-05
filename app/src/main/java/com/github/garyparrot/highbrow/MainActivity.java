@@ -3,15 +3,21 @@ package com.github.garyparrot.highbrow;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.SearchView;
 import androidx.databinding.DataBindingUtil;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.app.SearchManager;
+import android.app.SearchableInfo;
+import android.content.Intent;
 import android.graphics.Canvas;
 import android.os.Bundle;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -75,9 +81,28 @@ public class MainActivity extends AppCompatActivity{
         binding.navigationView.getMenu().findItem(R.id.topStories).setChecked(true);
         switchStorySeries(hackerNewsService::topStoryIds);
 
+        setupSearch();
         setupItemTouchHelper();
     }
 
+    private void setupSearch() {
+        SearchView searchView = (SearchView) binding.topAppBar.getMenu().findItem(R.id.searchView).getActionView();
+        searchView.setSubmitButtonEnabled(true);
+        searchView.setQueryHint("Search story...");
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                MainActivity.this.onSearchTextSubmit(query);
+                binding.topAppBar.collapseActionView();
+                return true;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                return false;
+            }
+        });
+    }
     private void setupItemTouchHelper() {
         new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.RIGHT) {
 
@@ -152,10 +177,10 @@ public class MainActivity extends AppCompatActivity{
                         .flatMapMaybe((b) -> {
                             if(b)
                                 return database.savedStory().delete(savedStory)
-                                            .andThen(Maybe.just(SaveResult.UNSAVED));
+                                        .andThen(Maybe.just(SaveResult.UNSAVED));
                             else
                                 return database.savedStory().insert(savedStory)
-                                            .andThen(Maybe.just(SaveResult.SAVED));
+                                        .andThen(Maybe.just(SaveResult.SAVED));
                         })
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe((res) -> {
@@ -165,6 +190,12 @@ public class MainActivity extends AppCompatActivity{
                         });
             }
         }).attachToRecyclerView(binding.recycleView);
+    }
+
+    private void onSearchTextSubmit(String query) {
+        Intent intent = new Intent(this, SearchResultActivity.class);
+        intent.putExtra(SearchResultActivity.BUNDLE_QUERY_TEXT, query);
+        startActivity(intent);
     }
 
     private boolean onNavigationViewItemSelected(MenuItem menuItem) {
