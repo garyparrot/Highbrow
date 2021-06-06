@@ -107,6 +107,7 @@ public class DictionaryFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        eventBus.register(this);
         if (getArguments() != null) {
             text = getArguments().getString(ARG_TEXT);
         }
@@ -115,15 +116,9 @@ public class DictionaryFragment extends Fragment {
     }
 
     @Override
-    public void onStart() {
-        super.onStart();
-        eventBus.register(this);
-    }
-
-    @Override
-    public void onStop() {
+    public void onDestroy() {
         eventBus.unregister(this);
-        super.onStop();
+        super.onDestroy();
     }
 
     @Override

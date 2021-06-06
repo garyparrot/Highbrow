@@ -1,24 +1,30 @@
 package com.github.garyparrot.highbrow;
 
+import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
+import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.github.garyparrot.highbrow.databinding.FragmentCommentBinding;
+import com.github.garyparrot.highbrow.event.ShareCommentRequest;
 import com.github.garyparrot.highbrow.layout.adapter.CommentRecyclerAdapter;
+import com.github.garyparrot.highbrow.model.hacker.news.item.Comment;
 import com.github.garyparrot.highbrow.model.hacker.news.item.Story;
 import com.github.garyparrot.highbrow.model.hacker.news.item.general.GeneralStory;
 import com.github.garyparrot.highbrow.model.hacker.news.item.map.MapStory;
+import com.github.garyparrot.highbrow.model.hacker.news.item.modifier.HasUrl;
 import com.github.garyparrot.highbrow.service.HackerNewsService;
 import com.google.gson.Gson;
 
 import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
 
 import java.util.Objects;
 
@@ -41,6 +47,53 @@ public class CommentFragment extends Fragment {
     @Inject
     Gson gson;
 
+    private Story story;
+
+    @Subscribe
+    public void subscribeShareRequest(ShareCommentRequest request) {
+        Comment comment = request.getComment();
+        StringBuilder shareContent = new StringBuilder();
+        shareContent
+                .append("HackerNews Story:")
+                .append(System.getProperty("line.separator"))
+                .append(story.getTitle())
+                .append(System.getProperty("line.separator"))
+                .append("-----")
+                .append(System.getProperty("line.separator"))
+                .append(comment.getAuthor()).append(" ")
+                .append("wrote:").append(System.getProperty("line.separator"))
+                .append(Html.fromHtml(comment.getText()).toString())
+                .append(System.getProperty("line.separator"))
+                .append("-----")
+                .append(System.getProperty("line.separator"))
+                .append(System.getProperty("line.separator"));
+        if(story.getUrl() != null && !story.getUrl().equals(""))
+            shareContent
+                .append("Article URL:")
+                .append(System.getProperty("line.separator"))
+                .append(story.getUrl())
+                .append(System.getProperty("line.separator"))
+                .append(System.getProperty("line.separator"));
+        shareContent
+                .append("Story URL:")
+                .append(System.getProperty("line.separator"))
+                .append("https://news.ycombinator.com/item?id=").append(story.getId())
+                .append(System.getProperty("line.separator"))
+                .append(System.getProperty("line.separator"))
+                .append("Comment URL:")
+                .append(System.getProperty("line.separator"))
+                .append("https://news.ycombinator.com/item?id=").append(comment.getId());
+
+        Intent sendIntent = new Intent();
+        sendIntent.setAction(Intent.ACTION_SEND);
+        sendIntent.putExtra(Intent.EXTRA_TEXT, shareContent.toString());
+        sendIntent.setType("text/plain");
+
+        Intent shareIntent = Intent.createChooser(sendIntent, null);
+        startActivity(shareIntent);
+
+    }
+
     CommentRecyclerAdapter adapter;
     FragmentCommentBinding binding;
 
@@ -58,6 +111,13 @@ public class CommentFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        eventBus.register(this);
+    }
+
+    @Override
+    public void onDestroy() {
+        eventBus.unregister(this);
+        super.onDestroy();
     }
 
     @Override
@@ -68,7 +128,7 @@ public class CommentFragment extends Fragment {
         Bundle bundle = getArguments();
         Objects.requireNonNull(bundle);
         Timber.d(bundle.getString(BUNDLE_STORY_JSON));
-        Story story = gson.fromJson(bundle.getString(BUNDLE_STORY_JSON), GeneralStory.class);
+        story = gson.fromJson(bundle.getString(BUNDLE_STORY_JSON), GeneralStory.class);
 
         adapter = new CommentRecyclerAdapter(getContext(), hackerNewsService, story.getKids());
         binding.recycleView.setAdapter(adapter);

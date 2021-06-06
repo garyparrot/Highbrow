@@ -85,7 +85,6 @@ public class StoryActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        eventBus.register(this);
 
         Bundle bundle = getIntent().getExtras();
         story = gson.fromJson(bundle.getString(BUNDLE_STORY_JSON), GeneralStory.class);
@@ -104,6 +103,12 @@ public class StoryActivity extends AppCompatActivity {
             else
                 throw new AssertionError("Suppose there is only two Tabs");
         }).attach();
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        eventBus.register(this);
     }
 
     @Override

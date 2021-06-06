@@ -2,6 +2,8 @@ package com.github.garyparrot.highbrow.layout.view;
 
 import android.animation.ValueAnimator;
 import android.content.Context;
+import android.content.Intent;
+import android.text.Html;
 import android.view.ActionMode;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -16,6 +18,7 @@ import androidx.annotation.NonNull;
 import com.github.garyparrot.highbrow.R;
 import com.github.garyparrot.highbrow.databinding.CommentCardViewBinding;
 import com.github.garyparrot.highbrow.event.DictionaryLookupEvent;
+import com.github.garyparrot.highbrow.event.ShareCommentRequest;
 import com.github.garyparrot.highbrow.event.TextToSpeechRequestEvent;
 import com.github.garyparrot.highbrow.model.hacker.news.item.Comment;
 import com.github.garyparrot.highbrow.service.HackerNewsService;
@@ -69,6 +72,11 @@ public class CommentItem extends FrameLayout {
         binding.card.setOnLongClickListener(this::onLongClick);
         binding.setSelectionMode(false);
         binding.selectionModeButton.setOnClickListener(this::onSwitchSelectionMode);
+        binding.shareCommentButton.setOnClickListener(this::onShareCommentButtonClicked);
+    }
+
+    private void onShareCommentButtonClicked(View view) {
+        eventBus.post(new ShareCommentRequest(binding.getItem()));
     }
 
     private void onSwitchSelectionMode(View view) {
