@@ -9,4 +9,6 @@
     <color name="white">#FFFFFFFF</color>
     <color name="ATTEMPT_UNSAVE_STORY_COLOR">#FF4A3C</color>
     <color name="ATTEMPT_STORY_COLOR">#1BCC0E</color>
+    <color name="itemOn">@color/purple_500</color>
+    <color name="itemOff">#bbbbbb</color>
 </resources>

@@ -7,6 +7,7 @@
         <variable name="item" type="com.github.garyparrot.highbrow.model.hacker.news.item.Comment" />
         <variable name="number" type="java.lang.Integer" />
         <variable name="fold" type="java.lang.Boolean" />
+        <variable name="selectionMode" type="java.lang.Boolean" />
         <import type="android.view.View"/>
         <import type="com.github.garyparrot.highbrow.layout.present.ItemPresenter"/>
         <import type="android.text.Html"/>
@@ -66,7 +67,7 @@
                     <com.google.android.material.textview.MaterialTextView
                         android:id="@+id/commentText"
                         style="@style/TextAppearance.MdcTypographyStyles.Body3"
-                        android:textIsSelectable="false"
+                        android:textIsSelectable="@{selectionMode ? true : false}"
                         android:ellipsize="end"
                         android:maxLines="@{fold ? 1 : 1000}"
                         app:layout_constraintTop_toBottomOf="@id/textViewAuthor"
@@ -86,10 +87,13 @@
                     android:orientation="horizontal">
 
                     <com.google.android.material.button.MaterialButton
+                        android:id="@+id/selectionModeButton"
                         android:layout_width="wrap_content"
                         android:layout_height="match_parent"
                         app:cornerRadius="0dp"
-                        app:icon="@drawable/ic_baseline_star_24"
+                        app:icon="@drawable/ic_baseline_text_fields_24"
+                        app:iconTint="@{selectionMode ? @color/itemOn : @color/itemOff}"
+                        android:background="?attr/selectableItemBackgroundBorderless"
                         style="@style/Widget.App.Button.OutlinedButton.IconOnly"/>
 
                     <com.google.android.material.button.MaterialButton
@@ -97,6 +101,7 @@
                         android:layout_height="match_parent"
                         app:cornerRadius="0dp"
                         app:icon="@drawable/ic_baseline_share_24"
+                        android:background="?attr/selectableItemBackgroundBorderless"
                         style="@style/Widget.App.Button.OutlinedButton.IconOnly"/>
 
                 </LinearLayout>

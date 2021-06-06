@@ -67,6 +67,12 @@ public class CommentItem extends FrameLayout {
         binding.commentText.setCustomSelectionActionModeCallback(getCallback());
         binding.card.setOnClickListener(this::onCardClicked);
         binding.card.setOnLongClickListener(this::onLongClick);
+        binding.setSelectionMode(false);
+        binding.selectionModeButton.setOnClickListener(this::onSwitchSelectionMode);
+    }
+
+    private void onSwitchSelectionMode(View view) {
+        binding.setSelectionMode(!binding.getSelectionMode().booleanValue());
     }
 
     private boolean onLongClick(View view) {
