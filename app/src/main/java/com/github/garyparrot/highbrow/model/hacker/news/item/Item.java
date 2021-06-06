@@ -10,6 +10,10 @@ public interface Item {
     String DEAD_ITEM_TEXT = "[Dead Content]";
     long BAD_LONG_VALUE = -1;
 
+    /**
+     * The global unique id of this item
+     * @return return the global unique id. if this is a illegal item, return {@link Item#BAD_LONG_VALUE} instead
+     */
     long getId();
 
     ItemType getItemType();

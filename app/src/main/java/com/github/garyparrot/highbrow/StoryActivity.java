@@ -122,7 +122,7 @@ public class StoryActivity extends AppCompatActivity {
         @Override
         public Fragment createFragment(int position) {
             if(position == 0)
-                return CommentFragment.newInstance(story.getId());
+                return CommentFragment.newInstance(gson, story);
             else if(position == 1)
                 return BrowserFragment.newInstance(story.getUrl());
             else

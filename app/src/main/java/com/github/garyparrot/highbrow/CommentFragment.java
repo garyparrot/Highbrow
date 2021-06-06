@@ -2,8 +2,7 @@ package com.github.garyparrot.highbrow;
 
 import android.os.Bundle;
 
-import androidx.databinding.DataBindingUtil;
-import androidx.databinding.ViewDataBinding;
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
@@ -14,25 +13,24 @@ import android.view.ViewGroup;
 import com.github.garyparrot.highbrow.databinding.FragmentCommentBinding;
 import com.github.garyparrot.highbrow.layout.adapter.CommentRecyclerAdapter;
 import com.github.garyparrot.highbrow.model.hacker.news.item.Story;
+import com.github.garyparrot.highbrow.model.hacker.news.item.general.GeneralStory;
+import com.github.garyparrot.highbrow.model.hacker.news.item.map.MapStory;
 import com.github.garyparrot.highbrow.service.HackerNewsService;
+import com.google.gson.Gson;
 
 import org.greenrobot.eventbus.EventBus;
 
-import java.util.List;
+import java.util.Objects;
 
 import javax.inject.Inject;
 
 import dagger.hilt.android.AndroidEntryPoint;
+import timber.log.Timber;
 
-/**
- * A simple {@link Fragment} subclass.
- * Use the {@link CommentFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
 @AndroidEntryPoint
 public class CommentFragment extends Fragment {
 
-    public static final String BUNDLE_STORY_ID = "BUNDLE_STORY_ID";
+    public static final String BUNDLE_STORY_JSON = "BUNDLE_STORY_JSON";
 
     @Inject
     EventBus eventBus;
@@ -40,21 +38,19 @@ public class CommentFragment extends Fragment {
     @Inject
     HackerNewsService hackerNewsService;
 
-    public CommentFragment() {
-        // Required empty public constructor
-    }
+    @Inject
+    Gson gson;
 
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param storyId The id of the story we want to display on this fragment.
-     * @return A new instance of fragment CommentFragment.
-     */
-    public static CommentFragment newInstance(long storyId) {
+    CommentRecyclerAdapter adapter;
+    FragmentCommentBinding binding;
+
+    public CommentFragment() { }
+
+    public static CommentFragment newInstance(Gson gson, Story story) {
         CommentFragment fragment = new CommentFragment();
         Bundle bundle = new Bundle();
-        bundle.putLong(BUNDLE_STORY_ID, storyId);
+        Timber.d(story.toString());
+        bundle.putString(BUNDLE_STORY_JSON, gson.toJson(story));
         fragment.setArguments(bundle);
         return fragment;
     }
@@ -65,22 +61,20 @@ public class CommentFragment extends Fragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        FragmentCommentBinding binding = FragmentCommentBinding.inflate(inflater, container, false);
-
-        binding.recycleView.setLayoutManager(new LinearLayoutManager(getContext()));
+        binding = FragmentCommentBinding.inflate(inflater, container, false);
 
         Bundle bundle = getArguments();
-        long storyId = bundle.getLong(BUNDLE_STORY_ID);
+        Objects.requireNonNull(bundle);
+        Timber.d(bundle.getString(BUNDLE_STORY_JSON));
+        Story story = gson.fromJson(bundle.getString(BUNDLE_STORY_JSON), GeneralStory.class);
 
-        hackerNewsService.getStory(storyId)
-                .addOnCompleteListener(task -> {
-                    Story story = task.getResult();
-                    List<Long> comments = story.getKids();
-                    binding.recycleView.setAdapter(new CommentRecyclerAdapter(CommentFragment.this.getContext(), hackerNewsService, comments));
-                });
+        adapter = new CommentRecyclerAdapter(getContext(), hackerNewsService, story.getKids());
+        binding.recycleView.setAdapter(adapter);
+        binding.recycleView.setLayoutManager(new LinearLayoutManager(getContext()));
 
         return binding.getRoot();
     }
+
 }
