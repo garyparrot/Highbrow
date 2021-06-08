@@ -21,6 +21,7 @@ import com.github.garyparrot.highbrow.event.DictionaryLookupEvent;
 import com.github.garyparrot.highbrow.event.ShareCommentRequest;
 import com.github.garyparrot.highbrow.event.TextToSpeechRequestEvent;
 import com.github.garyparrot.highbrow.model.hacker.news.item.Comment;
+import com.github.garyparrot.highbrow.model.hacker.news.item.Story;
 import com.github.garyparrot.highbrow.service.HackerNewsService;
 
 import org.greenrobot.eventbus.EventBus;
@@ -43,7 +44,6 @@ public class CommentItem extends FrameLayout {
 
     EventBus eventBus;
 
-    private boolean isIndentEnabled;
     private CommentCardViewBinding binding;
     private List<CommentItem> childComments;
     private boolean isToolBarFold = true;
@@ -186,55 +186,13 @@ public class CommentItem extends FrameLayout {
     public void setComment(Comment comment) {
         Timber.d("Set Comment %s", comment);
         binding.setItem(comment);
-
-        // Attempt to load subComments
-        loadChildComment(comment.getId(), comment.getKids());
-    }
-
-    private void loadChildComment(long parentId, List<Long> kids) {
-        final CountDownLatch latch = new CountDownLatch(kids.size());
-        final Comment[] collects = new Comment[kids.size()];
-        int count = 0;
-        for (Long kid : kids) {
-            final int index = count++;
-            Timber.d("Send request for kids[%d], target id %d", index, kid);
-            hackerNewsService.getComment(kid)
-                    .addOnSuccessListener((c) -> {
-                        latch.countDown();
-                        collects[index] = c;
-
-                        if(latch.getCount() == 0) {
-                            Timber.d("Collection done, now attempt to add child comments");
-                            addChildComment(parentId, collects);
-                        }
-                    });
-        }
-    }
-    private void addChildComment(long parentId, Comment[] comments) {
-        int number = 0;
-        for (Comment comment : comments) {
-            if(comment != null) {
-                Timber.d("Adding comment object to layout: %s", comment);
-                CommentItem item = new CommentItem(getContext());
-                item.setComment(comment);
-                item.setNumber(number++);
-                item.setIndentEnabled(true);
-                addChildCommentToLayout(item);
-            } else {
-                Timber.e("Null comment found: Parent index: %d, Item index: %d", parentId, number++);
-            }
-        }
     }
 
     public void setNumber(int number) {
         binding.setNumber(number);
     }
-    public void setIndentEnabled(boolean isEnabled) {
-        this.isIndentEnabled = isEnabled;
-        if(isEnabled)
-            binding.topLevelLinearLayout.setPadding((int)getResources().getDimension(R.dimen.commentIndent), 0, 0, 0);
-        else
-            binding.topLevelLinearLayout.setPadding(0,0,0,0);
+    public void setIndentLevel(int level) {
+        binding.topLevelLinearLayout.setPadding((int)getResources().getDimension(R.dimen.commentIndent) * level, 0, 0, 0);
     }
     public void addChildCommentToLayout(CommentItem commentItem) {
         childComments.add(commentItem);

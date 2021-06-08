@@ -130,7 +130,7 @@ public class CommentFragment extends Fragment {
         Timber.d(bundle.getString(BUNDLE_STORY_JSON));
         story = gson.fromJson(bundle.getString(BUNDLE_STORY_JSON), GeneralStory.class);
 
-        adapter = new CommentRecyclerAdapter(getContext(), hackerNewsService, story.getKids());
+        adapter = new CommentRecyclerAdapter(getContext(), hackerNewsService, story);
         binding.recycleView.setAdapter(adapter);
         binding.recycleView.setLayoutManager(new LinearLayoutManager(getContext()));
 

@@ -10,7 +10,7 @@ import lombok.Builder;
 import lombok.Data;
 
 @Data
-@Builder(builderClassName = "Builder")
+@Builder
 public class GeneralStory implements Story {
 
     long id;
