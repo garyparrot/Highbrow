@@ -79,7 +79,7 @@ public class MainActivity extends AppCompatActivity{
         binding.topAppBar.setNavigationOnClickListener((view) -> binding.drawerLayout.openDrawer(binding.navigationView));
         binding.navigationView.setNavigationItemSelectedListener(this::onNavigationViewItemSelected);
         binding.navigationView.getMenu().findItem(R.id.topStories).setChecked(true);
-        switchStorySeries(hackerNewsService::topStoryIds);
+        setStorySeriesByMenuId(R.id.topStories);
 
         setupSearch();
         setupItemTouchHelper();
@@ -200,20 +200,32 @@ public class MainActivity extends AppCompatActivity{
 
     private boolean onNavigationViewItemSelected(MenuItem menuItem) {
         menuItem.setChecked(true);
+        setStorySeriesByMenuId(menuItem.getItemId());
+        binding.drawerLayout.closeDrawer(binding.navigationView);
+        return true;
+    }
 
-        if(menuItem.getItemId() == R.id.topStories)
+    private void setStorySeriesByMenuId(int menuId) {
+        if(menuId == R.id.topStories) {
+            setActionBarTitle("Top Stories");
             switchStorySeries(hackerNewsService::topStoryIds);
-        else if(menuItem.getItemId() == R.id.newStories)
+        } else if(menuId == R.id.newStories) {
+            setActionBarTitle("New Stories");
             switchStorySeries(hackerNewsService::newStoryIds);
-        else if(menuItem.getItemId() == R.id.bestStories)
+        } else if(menuId == R.id.bestStories) {
+            setActionBarTitle("Best Stories");
             switchStorySeries(hackerNewsService::bestStoryIds);
-        else if(menuItem.getItemId() == R.id.askStories)
+        } else if(menuId == R.id.askStories) {
+            setActionBarTitle("Ask Stories");
             switchStorySeries(hackerNewsService::askStoryIds);
-        else if(menuItem.getItemId() == R.id.showStories)
+        } else if(menuId == R.id.showStories) {
+            setActionBarTitle("Show Stories");
             switchStorySeries(hackerNewsService::showStoryIds);
-        else if(menuItem.getItemId() == R.id.jobStories)
+        } else if(menuId == R.id.jobStories) {
+            setActionBarTitle("Job Stories");
             switchStorySeries(hackerNewsService::jobStoryIDs);
-        else if(menuItem.getItemId() == R.id.savedStories) {
+        } else if(menuId == R.id.savedStories) {
+            setActionBarTitle("Saved Stories");
             database.savedStory().findAll()
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
@@ -227,9 +239,13 @@ public class MainActivity extends AppCompatActivity{
                         e.printStackTrace();
                     });
         }
+    }
 
-        binding.drawerLayout.closeDrawer(binding.navigationView);
-        return true;
+    private void setActionBarTitle(int titleResourceId) {
+        binding.topAppBar.setTitle(titleResourceId);
+    }
+    private void setActionBarTitle(String title) {
+        binding.topAppBar.setTitle(title);
     }
 
     private Task<List<Long>> switchStorySeries(HackerNewsService.StorySeries seriesMethod) {
