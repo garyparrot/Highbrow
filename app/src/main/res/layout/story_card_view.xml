@@ -6,6 +6,7 @@
     <data>
         <variable name="item" type="com.github.garyparrot.highbrow.model.hacker.news.item.Story" />
         <variable name="number" type="java.lang.Integer" />
+        <variable name="commentCount" type="java.lang.Long" />
         <import type="com.github.garyparrot.highbrow.layout.present.ItemPresenter"/>
     </data>
 
@@ -128,6 +129,30 @@
                             android:text="@{ItemPresenter.getInformation(item)}"
                             tools:text="3h - by garyparrot"
                             android:layout_width="0dp"
+                            android:layout_height="wrap_content"/>
+
+                        <ImageView
+                            android:id="@+id/imageViewCommentCount"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintRight_toRightOf="parent"
+                            android:layout_marginEnd="60dp"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            app:tint="@color/light_teal"
+                            android:src="@drawable/ic_outline_comment_24"
+                            />
+                        <TextView
+                            android:id="@+id/commentCounter"
+                            android:text="@{commentCount.toString()}"
+                            android:textColor="@color/light_teal"
+                            android:textStyle="bold"
+                            tools:text="5566"
+                            android:layout_marginStart="3dp"
+                            android:paddingBottom="2dp"
+                            app:layout_constraintTop_toTopOf="@id/imageViewCommentCount"
+                            app:layout_constraintBottom_toBottomOf="@id/imageViewCommentCount"
+                            app:layout_constraintLeft_toRightOf="@id/imageViewCommentCount"
+                            android:layout_width="wrap_content"
                             android:layout_height="wrap_content"/>
 
                     </androidx.constraintlayout.widget.ConstraintLayout>

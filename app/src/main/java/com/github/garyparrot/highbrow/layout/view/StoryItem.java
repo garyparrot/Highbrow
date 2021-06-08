@@ -30,6 +30,7 @@ public class StoryItem extends FrameLayout {
     }
     public void setStory(Story story) {
         binding.setItem(story);
+        binding.setCommentCount(story.countDescendants());
     }
     public void setNumber(int number) {
         binding.setNumber(number);
