@@ -1,46 +1,97 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <data>
         <variable
             name="target"
             type="java.lang.String" />
         <variable
-            name="entries"
-            type="com.github.garyparrot.highbrow.model.dict.UrbanQueryResult" />
+            name="exceptionMessage"
+            type="java.lang.String" />
+        <variable
+            name="exceptionContent"
+            type="java.lang.String" />
+        <variable
+            name="showBigSadFace"
+            type="java.lang.Boolean" />
+        <variable
+            name="showResult"
+            type="java.lang.Boolean" />
+        <variable
+            name="showExceptionMessage"
+            type="java.lang.Boolean" />
         <import type="com.github.garyparrot.highbrow.layout.present.DictionaryPresenter"/>
+        <import type="android.view.View"/>
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
-        xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:padding="10dp"
         tools:context=".DictionaryFragment">
 
         <TextView
             android:id="@+id/title"
+            android:visibility="@{showResult ? View.VISIBLE : View.GONE }"
             style="@style/TextAppearance.MaterialComponents.Headline6"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintLeft_toLeftOf="parent"
-            android:text="@{DictionaryPresenter.titleForQueryResult(target, entries)}"
+            android:text="@{DictionaryPresenter.titleForQueryResult(target)}"
             tools:text="'WFH' from Urban Dictionary ..."
             android:layout_width="match_parent"
             android:layout_height="wrap_content"/>
 
         <androidx.recyclerview.widget.RecyclerView
-            app:layout_constraintTop_toBottomOf="@id/title"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toRightOf="parent"
-            tools:listitem="@layout/dictionary_entry_view"
-            tools:itemCount="10"
-            android:layout_marginTop="10dp"
             android:id="@+id/recycleView"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:visibility="@{showResult ? View.VISIBLE : View.GONE }"
+            app:layout_constraintHorizontal_bias="1.0"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/title"
+            tools:itemCount="10"
+            tools:listitem="@layout/dictionary_entry_view" />
 
+        <LinearLayout
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            android:visibility="@{showExceptionMessage ? View.VISIBLE : View.GONE }"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            tools:visibility="visible">
+
+            <TextView
+                android:text=";("
+                style="@style/TextAppearance.MaterialComponents.Headline1"
+                android:visibility="@{showBigSadFace ? View.VISIBLE : View.GONE}"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+            <TextView
+                android:id="@+id/textViewExceptionTitle"
+                android:text="@{exceptionMessage}"
+                style="@style/TextAppearance.MaterialComponents.Headline6"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                tools:text="Oops"
+                />
+            <TextView
+                android:id="@+id/textViewExceptionContent"
+                style="@style/TextAppearance.MdcTypographyStyles.decoration"
+                android:text="@{exceptionContent}"
+                android:visibility="@{exceptionContent.length() > 0 ? View.VISIBLE : View.GONE}"
+                tools:text="Something wrong ;("
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+        </LinearLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

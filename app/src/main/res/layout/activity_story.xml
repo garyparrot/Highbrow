@@ -131,7 +131,7 @@
                 android:name="com.github.garyparrot.highbrow.DictionaryFragment"
                 tools:layout="@layout/fragment_dictionary"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
+                android:layout_height="match_parent"/>
 
         </FrameLayout>
 

@@ -14,6 +14,8 @@ import android.view.ViewGroup;
 import com.github.garyparrot.highbrow.databinding.DictionaryEntryViewBinding;
 import com.github.garyparrot.highbrow.databinding.FragmentDictionaryBinding;
 import com.github.garyparrot.highbrow.event.DictionaryLookupEvent;
+import com.github.garyparrot.highbrow.event.DictionaryLookupResultEvent;
+import com.github.garyparrot.highbrow.model.dict.UrbanQueryEntry;
 import com.github.garyparrot.highbrow.model.dict.UrbanQueryResult;
 import com.github.garyparrot.highbrow.service.UrbanDictionaryService;
 
@@ -21,6 +23,10 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import javax.inject.Inject;
 
@@ -31,7 +37,6 @@ import timber.log.Timber;
 
 /**
  * A simple {@link Fragment} subclass.
- * Use the {@link DictionaryFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
 @AndroidEntryPoint
@@ -43,70 +48,45 @@ public class DictionaryFragment extends Fragment {
     @Inject
     UrbanDictionaryService urbanDictionaryService;
 
-    private static final String ARG_TEXT = "TEXT";
-
-    private String queryWord;
-    FragmentDictionaryBinding binding;
+    private RecyclerViewAdapter adapter = null;
+    private FragmentDictionaryBinding binding;
 
     public DictionaryFragment() {
     }
 
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @return A new instance of fragment DictionaryFragment.
-     */
-    public static DictionaryFragment newInstance(String text) {
-        DictionaryFragment fragment = new DictionaryFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_TEXT, text);
-        fragment.setArguments(args);
-        return fragment;
-    }
-
     @Subscribe(threadMode = ThreadMode.MAIN)
-    public void onReceiveDictionaryLookupEvent(DictionaryLookupEvent event) {
-        performQuery(event.getText());
-    }
+    public void onReceiveDictionaryLookupResultEvent(DictionaryLookupResultEvent event) {
 
-    private void performQuery(String queryWord) {
-        setQueryWord(queryWord);
-        doQuery(queryWord);
-    }
-
-    private void setQueryWord(String queryWord) {
-        this.queryWord = queryWord;
-        binding.setTarget(queryWord);
-    }
-
-    private void doQuery(String text) {
-        if(text == null || text.equals("")) {
-            Timber.w("Ignore a null query");
-            return;
+        if(event.isQuerySucceedWithContent()) {
+            binding.setShowResult(true);
+            binding.setShowExceptionMessage(false);
+            binding.setShowBigSadFace(false);
+            binding.setTarget(event.getQueryWord());
+            getAdapter().setItems(event.getResult().getList());
+        } else if (event.isQueryEmpty()) {
+            binding.setShowResult(false);
+            binding.setShowExceptionMessage(true);
+            binding.setShowBigSadFace(true);
+            binding.setExceptionMessage("No definition found");
+            binding.setExceptionContent("");
+        } else {
+            binding.setShowResult(false);
+            binding.setShowExceptionMessage(true);
+            binding.setShowBigSadFace(true);
+            binding.setExceptionMessage("Oops");
+            // TODO: Use a much friendly error message.
+            if (event.getThrowable() != null) {
+                binding.setExceptionContent(event.getThrowable().toString());
+            } else {
+                binding.setExceptionContent("Something wrong, try again later");
+            }
         }
-        urbanDictionaryService.query(text)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe((query) -> {
-                    binding.setEntries(query);
-                    binding.recycleView.setLayoutManager(new LinearLayoutManager(getContext()));
-                    binding.recycleView.setAdapter(getAdapter(query));
-                }, (error) -> {
-                    error.printStackTrace();
-                    Timber.e(error);
-                });
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         eventBus.register(this);
-        if (getArguments() != null) {
-            queryWord = getArguments().getString(ARG_TEXT);
-        }
-        if(queryWord != null)
-            performQuery(queryWord);
     }
 
     @Override
@@ -119,12 +99,18 @@ public class DictionaryFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         binding = FragmentDictionaryBinding.inflate(inflater, container, false);
 
+        binding.setShowResult(true);
+        binding.setShowExceptionMessage(false);
+        binding.recycleView.setLayoutManager(new LinearLayoutManager(getContext()));
+        binding.recycleView.setAdapter(getAdapter());
+
         return binding.getRoot();
     }
 
-
-    private RecyclerView.Adapter getAdapter(final UrbanQueryResult result) {
-        return new RecyclerViewAdapter(result, getLayoutInflater());
+    private RecyclerViewAdapter getAdapter() {
+        if(adapter == null)
+            adapter = new RecyclerViewAdapter(Collections.emptyList(), getLayoutInflater());
+        return adapter;
     }
 
     private static class ViewHolder extends RecyclerView.ViewHolder {
@@ -139,11 +125,28 @@ public class DictionaryFragment extends Fragment {
     private static class RecyclerViewAdapter extends RecyclerView.Adapter<ViewHolder> {
 
         private final LayoutInflater inflater;
-        private final UrbanQueryResult result;
+        private final List<UrbanQueryEntry> definitionEntries;
 
-        public RecyclerViewAdapter(UrbanQueryResult result, LayoutInflater inflater) {
-            this.result = result;
+        /**
+         * Initialize a RecyclerViewAdapter which specialize in deal with urban query results.
+         * @param entries The initial list of definition entry.
+         * @param inflater The layout inflator
+         */
+        public RecyclerViewAdapter(List<UrbanQueryEntry> entries, LayoutInflater inflater) {
+
+            // Preserve a local copy of user given list
+            List<UrbanQueryEntry> localCopy = new ArrayList<>();
+            Collections.copy(localCopy, entries);
+
+            this.definitionEntries = localCopy;
             this.inflater = inflater;
+        }
+
+        public void setItems(List<UrbanQueryEntry> content) {
+            notifyItemRangeRemoved(0, definitionEntries.size());
+            definitionEntries.clear();
+            definitionEntries.addAll(content);
+            notifyItemRangeInserted(0, definitionEntries.size());
         }
 
         @NonNull
@@ -156,13 +159,13 @@ public class DictionaryFragment extends Fragment {
 
         @Override
         public void onBindViewHolder(@NonNull @NotNull DictionaryFragment.ViewHolder holder, int position) {
-            holder.binding.setEntry(result.getList().get(position));
+            holder.binding.setEntry(definitionEntries.get(position));
             holder.binding.setIndex(position+1);
         }
 
         @Override
         public int getItemCount() {
-            return result.getList().size();
+            return definitionEntries.size();
         }
     }
 }

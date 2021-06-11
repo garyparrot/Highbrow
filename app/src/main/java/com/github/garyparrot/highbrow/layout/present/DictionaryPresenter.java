@@ -6,7 +6,7 @@ import java.util.Locale;
 
 public class DictionaryPresenter {
 
-    public static String titleForQueryResult(String target, UrbanQueryResult result) {
+    public static String titleForQueryResult(String target) {
         return String.format(Locale.getDefault(), "'%s' from Urban Dictionary", target);
     }
 

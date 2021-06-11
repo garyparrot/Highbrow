@@ -1,6 +1,7 @@
 package com.github.garyparrot.highbrow;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.Fragment;
@@ -17,10 +18,14 @@ import android.widget.FrameLayout;
 
 import com.github.garyparrot.highbrow.databinding.ActivityStoryBinding;
 import com.github.garyparrot.highbrow.event.DictionaryLookupEvent;
+import com.github.garyparrot.highbrow.event.DictionaryLookupResultEvent;
 import com.github.garyparrot.highbrow.event.TextToSpeechRequestEvent;
+import com.github.garyparrot.highbrow.model.dict.UrbanQueryResult;
 import com.github.garyparrot.highbrow.model.hacker.news.item.Story;
 import com.github.garyparrot.highbrow.model.hacker.news.item.general.GeneralStory;
 import com.github.garyparrot.highbrow.service.HackerNewsService;
+import com.github.garyparrot.highbrow.service.UrbanDictionaryService;
+import com.github.garyparrot.highbrow.util.StringUtility;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.tabs.TabLayoutMediator;
 import com.google.gson.Gson;
@@ -34,6 +39,8 @@ import java.util.Locale;
 import javax.inject.Inject;
 
 import dagger.hilt.android.AndroidEntryPoint;
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
+import io.reactivex.rxjava3.schedulers.Schedulers;
 import timber.log.Timber;
 
 @AndroidEntryPoint
@@ -51,6 +58,9 @@ public class StoryActivity extends AppCompatActivity {
     @Inject
     TextToSpeech ttsEngine;
 
+    @Inject
+    UrbanDictionaryService urbanDictionaryService;
+
     public static final String BUNDLE_STORY_JSON = "BUNDLE_STORY_JSON";
 
     private Story story;
@@ -66,7 +76,18 @@ public class StoryActivity extends AppCompatActivity {
     public void onDictionaryLookup(DictionaryLookupEvent event) {
         // When a dictionary lookup event occurred, we suppose to expand the sheet in case it is
         // not visible on the screen.
-        setBottomSheetState(BottomSheetBehavior.STATE_EXPANDED);
+        String lookupString = event.getText();
+        String lookupFirstWord = StringUtility.firstWord(lookupString);
+
+        urbanDictionaryService.query(lookupFirstWord)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe((urbanQueryResult, throwable) -> {
+                    if(throwable != null)
+                        throwable.printStackTrace();
+                    eventBus.post(new DictionaryLookupResultEvent(lookupFirstWord ,urbanQueryResult, throwable));
+                    setBottomSheetState(BottomSheetBehavior.STATE_EXPANDED);
+                });
     }
 
     private void setBottomSheetState(int state) {
