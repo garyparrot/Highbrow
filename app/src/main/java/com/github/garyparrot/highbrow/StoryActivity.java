@@ -74,18 +74,15 @@ public class StoryActivity extends AppCompatActivity {
 
     @Subscribe
     public void onDictionaryLookup(DictionaryLookupEvent event) {
-        // When a dictionary lookup event occurred, we suppose to expand the sheet in case it is
-        // not visible on the screen.
         String lookupString = event.getText();
-        String lookupFirstWord = StringUtility.firstWord(lookupString);
 
-        urbanDictionaryService.query(lookupFirstWord)
+        urbanDictionaryService.query(lookupString)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe((urbanQueryResult, throwable) -> {
                     if(throwable != null)
                         throwable.printStackTrace();
-                    eventBus.post(new DictionaryLookupResultEvent(lookupFirstWord ,urbanQueryResult, throwable));
+                    eventBus.post(new DictionaryLookupResultEvent(lookupString, urbanQueryResult, throwable));
                     setBottomSheetState(BottomSheetBehavior.STATE_EXPANDED);
                 });
     }

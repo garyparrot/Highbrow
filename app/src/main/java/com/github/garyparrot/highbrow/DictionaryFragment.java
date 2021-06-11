@@ -8,6 +8,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -68,7 +69,7 @@ public class DictionaryFragment extends Fragment {
             binding.setShowExceptionMessage(true);
             binding.setShowBigSadFace(true);
             binding.setExceptionMessage("No definition found");
-            binding.setExceptionContent("");
+            binding.setExceptionContent(event.getQueryWord());
         } else {
             binding.setShowResult(false);
             binding.setShowExceptionMessage(true);
@@ -103,6 +104,7 @@ public class DictionaryFragment extends Fragment {
         binding.setShowExceptionMessage(false);
         binding.recycleView.setLayoutManager(new LinearLayoutManager(getContext()));
         binding.recycleView.setAdapter(getAdapter());
+        binding.recycleView.setNestedScrollingEnabled(true);
 
         return binding.getRoot();
     }

@@ -20,6 +20,7 @@
         <com.google.android.material.appbar.AppBarLayout
             android:fitsSystemWindows="true"
             app:liftOnScroll="true"
+            app:layout_behavior=".layout.util.CustomAppBarLayoutBehavior"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
@@ -116,7 +117,7 @@
             android:background="@drawable/shape_gradient_top_shadow"
             app:layout_anchor="@id/bottomSheet" />
 
-        <FrameLayout
+        <androidx.core.widget.NestedScrollView
             android:id="@+id/bottomSheet"
             app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior"
             style="@style/Widget.MaterialComponents.BottomSheet"
@@ -126,14 +127,14 @@
             android:layout_width="match_parent"
             android:layout_height="400dp">
 
-            <androidx.fragment.app.FragmentContainerView
-                android:id="@+id/fragment"
-                android:name="com.github.garyparrot.highbrow.DictionaryFragment"
-                tools:layout="@layout/fragment_dictionary"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"/>
+                <androidx.fragment.app.FragmentContainerView
+                    android:id="@+id/fragment"
+                    android:name="com.github.garyparrot.highbrow.DictionaryFragment"
+                    tools:layout="@layout/fragment_dictionary"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"/>
 
-        </FrameLayout>
+        </androidx.core.widget.NestedScrollView>
 
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 
