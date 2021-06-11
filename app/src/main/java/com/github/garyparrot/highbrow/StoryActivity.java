@@ -66,7 +66,7 @@ public class StoryActivity extends AppCompatActivity {
     public void onDictionaryLookup(DictionaryLookupEvent event) {
         // When a dictionary lookup event occurred, we suppose to expand the sheet in case it is
         // not visible on the screen.
-        setBottomSheetState(BottomSheetBehavior.STATE_HALF_EXPANDED);
+        setBottomSheetState(BottomSheetBehavior.STATE_EXPANDED);
     }
 
     private void setBottomSheetState(int state) {

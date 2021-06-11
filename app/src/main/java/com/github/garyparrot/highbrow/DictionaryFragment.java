@@ -4,13 +4,9 @@ import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.Lifecycle;
-import androidx.lifecycle.LifecycleEventObserver;
-import androidx.lifecycle.LifecycleOwner;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,7 +14,6 @@ import android.view.ViewGroup;
 import com.github.garyparrot.highbrow.databinding.DictionaryEntryViewBinding;
 import com.github.garyparrot.highbrow.databinding.FragmentDictionaryBinding;
 import com.github.garyparrot.highbrow.event.DictionaryLookupEvent;
-import com.github.garyparrot.highbrow.model.dict.UrbanQueryEntry;
 import com.github.garyparrot.highbrow.model.dict.UrbanQueryResult;
 import com.github.garyparrot.highbrow.service.UrbanDictionaryService;
 
@@ -27,17 +22,12 @@ import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.List;
-
 import javax.inject.Inject;
 
 import dagger.hilt.android.AndroidEntryPoint;
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
-import io.reactivex.rxjava3.core.Single;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 import timber.log.Timber;
-
-import static java.security.AccessController.getContext;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -55,7 +45,7 @@ public class DictionaryFragment extends Fragment {
 
     private static final String ARG_TEXT = "TEXT";
 
-    private String text;
+    private String queryWord;
     FragmentDictionaryBinding binding;
 
     public DictionaryFragment() {
@@ -77,17 +67,21 @@ public class DictionaryFragment extends Fragment {
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onReceiveDictionaryLookupEvent(DictionaryLookupEvent event) {
-        setText(event.getText());
+        performQuery(event.getText());
     }
 
-    public void setText(String targetText) {
-        this.text = targetText;
-        binding.setTarget(targetText);
-        doQuery(targetText);
+    private void performQuery(String queryWord) {
+        setQueryWord(queryWord);
+        doQuery(queryWord);
+    }
+
+    private void setQueryWord(String queryWord) {
+        this.queryWord = queryWord;
+        binding.setTarget(queryWord);
     }
 
     private void doQuery(String text) {
-        if(text == null) {
+        if(text == null || text.equals("")) {
             Timber.w("Ignore a null query");
             return;
         }
@@ -109,10 +103,10 @@ public class DictionaryFragment extends Fragment {
         super.onCreate(savedInstanceState);
         eventBus.register(this);
         if (getArguments() != null) {
-            text = getArguments().getString(ARG_TEXT);
+            queryWord = getArguments().getString(ARG_TEXT);
         }
-        if(text != null)
-            setText(text);
+        if(queryWord != null)
+            performQuery(queryWord);
     }
 
     @Override
@@ -163,6 +157,7 @@ public class DictionaryFragment extends Fragment {
         @Override
         public void onBindViewHolder(@NonNull @NotNull DictionaryFragment.ViewHolder holder, int position) {
             holder.binding.setEntry(result.getList().get(position));
+            holder.binding.setIndex(position+1);
         }
 
         @Override

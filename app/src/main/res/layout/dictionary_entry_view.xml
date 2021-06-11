@@ -8,13 +8,32 @@
         <variable
             name="entry"
             type="com.github.garyparrot.highbrow.model.dict.UrbanQueryEntry" />
+        <variable
+            name="index"
+            type="java.lang.Integer" />
     </data>
 
     <LinearLayout
         android:id="@+id/layout"
+        android:padding="10dp"
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
+
+        <TextView
+            android:id="@+id/textViewTitle"
+            android:text="@{ index != null ? `Explainment #`+index : `Explainment`}"
+            style="@style/TextAppearance.MaterialComponents.Subtitle2"
+            tools:text="Dictionary Explain #1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="2dp"
+            android:background="#ccc"
+            />
 
         <TextView
             tools:text="Work from Home - a concept popularized from COVID-19, where everyone is self-quarantined, resulting in many working from home."
@@ -23,10 +42,10 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"/>
 
-
         <Space
             android:layout_width="match_parent"
             android:layout_height="10dp"/>
+
     </LinearLayout>
 
 </layout>
