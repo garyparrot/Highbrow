@@ -9,6 +9,9 @@ import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.ObjectAnimator;
 import android.app.SearchManager;
 import android.app.SearchableInfo;
 import android.content.Intent;
@@ -66,6 +69,7 @@ public class MainActivity extends AppCompatActivity{
 
     private ActivityMainBinding binding;
     private HackerNewsService.StorySeries currentStorySeries;
+    private ItemTouchHelper itemTouchHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -104,13 +108,13 @@ public class MainActivity extends AppCompatActivity{
         });
     }
     private void setupItemTouchHelper() {
-        new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.RIGHT) {
+        ItemTouchHelper itemTouchHelper = new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.RIGHT) {
 
             private View getForegroundView(RecyclerView.ViewHolder vh) {
                 return ((StoryRecyclerAdapter.ViewHolder) vh).itemView.findViewById(R.id.foregroundFrame);
             }
 
-            private TextView getScrollLeftHintTextView(RecyclerView.ViewHolder vh){
+            private TextView getScrollLeftHintTextView(RecyclerView.ViewHolder vh) {
                 return vh.itemView.findViewById(R.id.textViewScrollLeftHint);
             }
 
@@ -136,7 +140,7 @@ public class MainActivity extends AppCompatActivity{
 
             @Override
             public void onSelectedChanged(@Nullable @org.jetbrains.annotations.Nullable RecyclerView.ViewHolder viewHolder, int actionState) {
-                if(viewHolder != null) {
+                if (viewHolder != null) {
                     getDefaultUIUtil().onSelected(getForegroundView(viewHolder));
                     setScrollHintTextStyle(viewHolder);
                 }
@@ -163,33 +167,67 @@ public class MainActivity extends AppCompatActivity{
             public boolean onMove(@NonNull @NotNull RecyclerView recyclerView, @NonNull @NotNull RecyclerView.ViewHolder viewHolder, @NonNull @NotNull RecyclerView.ViewHolder target) {
                 return false;
             }
+
             @Override
             public void onSwiped(@NonNull @NotNull RecyclerView.ViewHolder viewHolder, int direction) {
-                binding.recycleView.getAdapter().notifyItemChanged(viewHolder.getAdapterPosition());
-
-                // Get the story from the View object
-                Story story = ((StoryItem) viewHolder.itemView).getStory();
-                SavedStory savedStory = SavedStory.from(story);
-
-                // Save it into DB if story not exists yet, otherwise delete it.
-                database.savedStory().isSavedStoryExists(story.getId())
-                        .subscribeOn(Schedulers.io())
-                        .flatMapMaybe((b) -> {
-                            if(b)
-                                return database.savedStory().delete(savedStory)
-                                        .andThen(Maybe.just(SaveResult.UNSAVED));
-                            else
-                                return database.savedStory().insert(savedStory)
-                                        .andThen(Maybe.just(SaveResult.SAVED));
-                        })
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe((res) -> {
-                            StoryRecyclerAdapter.ViewHolder customViewHolder = getCustomViewHolder(viewHolder);
-                            customViewHolder.setSaved(!customViewHolder.getSaved());
-                            Toast.makeText(MainActivity.this, res.toString(), Toast.LENGTH_SHORT).show();
-                        });
+                StoryRecyclerAdapter.ViewHolder holder = ((StoryRecyclerAdapter.ViewHolder) viewHolder);
+                onStorySwiped(holder, direction);
             }
-        }).attachToRecyclerView(binding.recycleView);
+        });
+        itemTouchHelper.attachToRecyclerView(binding.recycleView);
+
+        this.itemTouchHelper = itemTouchHelper;
+    ;}
+
+    private void onStorySwiped(StoryRecyclerAdapter.ViewHolder viewHolder, int direction) {
+        // Get the story from the View object
+        Story story = ((StoryItem) viewHolder.itemView).getStory();
+        SavedStory savedStory = SavedStory.from(story);
+
+        // Save it into DB if story not exists yet, otherwise delete it.
+        database.savedStory().isSavedStoryExists(story.getId())
+                .subscribeOn(Schedulers.io())
+                .flatMapMaybe((b) -> {
+                    if (b)
+                        return database.savedStory().delete(savedStory)
+                                .andThen(Maybe.just(SaveResult.UNSAVED));
+                    else
+                        return database.savedStory().insert(savedStory)
+                                .andThen(Maybe.just(SaveResult.SAVED));
+                })
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe((res) -> {
+                    StoryRecyclerAdapter.ViewHolder customViewHolder = viewHolder;
+
+                    // Update the cached saving state in view holder
+                    customViewHolder.setSaved(!customViewHolder.getSaved());
+
+                    // Hacky way to letting item swiped item move back:
+                    // After the swipe event, the item will stuck outside of screen.
+                    // According to my understanding, the ItemTouchHelper using the translationX
+                    // to play the item swiping animation.
+                    // The following code will let the swiped view move back to where it suppose to be,
+                    // which act as a move back animation.
+                    ObjectAnimator moveBack= ObjectAnimator.ofFloat(viewHolder.itemView.findViewById(R.id.foregroundFrame), "translationX", 0);
+                    moveBack.setDuration(500);
+                    // But that is not the end of the story, it feels like ItemTouchHelper store some kind
+                    // of swiping state inside its object.
+                    // After we doing these nasty thing outside the object's understanding, their own state is illegal
+                    // now. Which is why we doing the following code to reset their state. So next time we
+                    // swipe the item it won't breaks.
+                    moveBack.addListener(new AnimatorListenerAdapter() {
+                        @Override
+                        public void onAnimationEnd(Animator animation, boolean isReverse) {
+                            itemTouchHelper.attachToRecyclerView(null);
+                            itemTouchHelper.attachToRecyclerView(binding.recycleView);
+                        }
+                    });
+                    moveBack.start();
+
+                    // Display a friend toast
+                    Toast.makeText(MainActivity.this, res.toString(), Toast.LENGTH_SHORT).show();
+                });
+
     }
 
     private void onSearchTextSubmit(String query) {
