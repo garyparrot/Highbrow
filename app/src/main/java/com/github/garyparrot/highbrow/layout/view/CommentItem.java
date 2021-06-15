@@ -10,6 +10,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AccelerateInterpolator;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 
@@ -99,23 +100,21 @@ public class CommentItem extends FrameLayout {
         // Apply animation on the toolbar layout
         float targetHeight = getResources().getDimension(R.dimen.commentToolBarHeight);
         if(isToolBarFold) {
-            ValueAnimator animator = ValueAnimator.ofFloat(0, targetHeight);
+            ValueAnimator animator = ValueAnimator.ofInt(0, (int)targetHeight);
             animator.addUpdateListener((valueAnimator) -> {
-                float value = (float) valueAnimator.getAnimatedValue();
                 ViewGroup.LayoutParams layoutParams = binding.commentToolBar.getLayoutParams();
-                ViewGroup.LayoutParams params = new LinearLayout.LayoutParams(layoutParams.width, (int)value);
-                binding.commentToolBar.setLayoutParams(params);
+                layoutParams.height = (int) valueAnimator.getAnimatedValue();
+                binding.commentToolBar.setLayoutParams(layoutParams);
             });
             animator.setDuration(300);
             animator.start();
             isToolBarFold = !isToolBarFold;
         } else {
-            ValueAnimator animator = ValueAnimator.ofFloat(targetHeight, 0);
+            ValueAnimator animator = ValueAnimator.ofInt((int)targetHeight, 0);
             animator.addUpdateListener((valueAnimator) -> {
-                float value = (float) valueAnimator.getAnimatedValue();
                 ViewGroup.LayoutParams layoutParams = binding.commentToolBar.getLayoutParams();
-                ViewGroup.LayoutParams params = new LinearLayout.LayoutParams(layoutParams.width, (int)value);
-                binding.commentToolBar.setLayoutParams(params);
+                layoutParams.height = (int) valueAnimator.getAnimatedValue();
+                binding.commentToolBar.setLayoutParams(layoutParams);
             });
             animator.setDuration(300);
             animator.start();

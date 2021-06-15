@@ -18,32 +18,37 @@ import com.google.android.gms.tasks.Task;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.ExecutorService;
+
 import timber.log.Timber;
 
 public class CommentRecyclerAdapter extends RecyclerView.Adapter<CommentRecyclerAdapter.ViewHolder> {
 
     private static int nextRequestId = 0;
-    private Map<Long, Task<Comment>> commentStorage;
-    private Map<Long, Integer> commentDepth;
+    private final Map<Long, Task<Comment>> commentStorage;
+    private final Map<Long, Integer> commentDepth;
     private final Story story;
     private final List<Long> targetIds;
     private final HackerNewsService hackerNews;
     private final Context context;
+    private final ExecutorService downloadExecutorService;
 
     private static int getNextRequestId() {
         return nextRequestId++;
     }
 
-    public CommentRecyclerAdapter(Context context, HackerNewsService service, Story story) {
+    public CommentRecyclerAdapter(Context context, HackerNewsService service, ExecutorService downloadExecutorService, Story story) {
         this.context = context;
         this.commentStorage = Collections.synchronizedMap(new HashMap<>());
         this.commentDepth = Collections.synchronizedMap(new HashMap<>());
         this.story = story;
+        this.downloadExecutorService = downloadExecutorService;
         hackerNews = service;
         targetIds = Collections.synchronizedList(new ArrayList<>(story.getKids()));
     }
@@ -144,7 +149,7 @@ public class CommentRecyclerAdapter extends RecyclerView.Adapter<CommentRecycler
     }
     private Task<Comment> launchCommentDownloadTaskInternal(long commentId) {
         return hackerNews.getComment(commentId)
-                .continueWith(taskInstance -> {
+                .continueWith(downloadExecutorService, taskInstance -> {
                     Comment comment = taskInstance.getResult();
                     if(comment.getParentId() == story.getId()) {
                         commentDepth.put(comment.getId(), 0);
@@ -154,12 +159,12 @@ public class CommentRecyclerAdapter extends RecyclerView.Adapter<CommentRecycler
                     return taskInstance.getResult();
                 })
                 .addOnSuccessListener((comment) -> {
-                    synchronized (targetIds) {
-                        int index = targetIds.indexOf(comment.getId());
-                        notifyItemChanged(index);
-                        targetIds.addAll(index + 1, comment.getKids());
-                        notifyItemRangeInserted(index + 1, comment.getKids().size());
-                    }
+                    int index;
+                    // No need to sync this since we are running on main thread at this moment.
+                    index = targetIds.indexOf(comment.getId());
+                    targetIds.addAll(index + 1, comment.getKids());
+                    notifyItemChanged(index);
+                    notifyItemRangeInserted(index + 1, comment.getKids().size());
                 });
     }
 }

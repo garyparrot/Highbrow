@@ -17,7 +17,7 @@ import com.google.firebase.database.GenericTypeIndicator;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
+import java.util.concurrent.ExecutorService;
 
 public class FirebaseHackerNewsService implements HackerNewsService {
 
@@ -25,51 +25,53 @@ public class FirebaseHackerNewsService implements HackerNewsService {
             = new GenericTypeIndicator<List<Long>>() { };
     DatabaseReference firebase;
     DatabaseReference hackerNews;
+    ExecutorService executorService;
 
-    public FirebaseHackerNewsService(DatabaseReference firebase) {
+    public FirebaseHackerNewsService(ExecutorService executorService, DatabaseReference firebase) {
         this.firebase = firebase;
         this.hackerNews = firebase.child("v0");
+        this.executorService = executorService;
     }
 
     private Task<Map<String, Object>> getMapOfItemIdTask(long id) {
         Task<DataSnapshot> item = hackerNews.child("item").child(String.valueOf(id)).get();
         //noinspection unchecked
-        return item.continueWith((x) -> (Map<String, Object>)x.getResult().getValue());
+        return item.continueWith(executorService, (x) -> (Map<String, Object>)x.getResult().getValue());
     }
 
     @Override
     public Task<Item> getItem(long id) {
-        return (getMapOfItemIdTask(id)).continueWith(x -> MapItems.itemFrom(x.getResult()));
+        return (getMapOfItemIdTask(id)).continueWith(executorService, x -> MapItems.itemFrom(x.getResult()));
     }
 
     @Override
     public Task<Story> getStory(long id) {
-        return (getMapOfItemIdTask(id)).continueWith(x -> MapItems.storyFrom(x.getResult()));
+        return (getMapOfItemIdTask(id)).continueWith(executorService, x -> MapItems.storyFrom(x.getResult()));
     }
 
     @Override
     public Task<Comment> getComment(long id) {
-        return (getMapOfItemIdTask(id)).continueWith(x -> MapItems.commentFrom(x.getResult()));
+        return (getMapOfItemIdTask(id)).continueWith(executorService, x -> MapItems.commentFrom(x.getResult()));
     }
 
     @Override
     public Task<Job> getJob(long id) {
-        return (getMapOfItemIdTask(id)).continueWith(x -> MapItems.jobFrom(x.getResult()));
+        return (getMapOfItemIdTask(id)).continueWith(executorService, x -> MapItems.jobFrom(x.getResult()));
     }
 
     @Override
     public Task<Ask> getAsk(long id) {
-        return (getMapOfItemIdTask(id)).continueWith(x -> MapItems.askFrom(x.getResult()));
+        return (getMapOfItemIdTask(id)).continueWith(executorService, x -> MapItems.askFrom(x.getResult()));
     }
 
     @Override
     public Task<Poll> getPoll(long id) {
-        return (getMapOfItemIdTask(id)).continueWith(x -> MapItems.pollFrom(x.getResult()));
+        return (getMapOfItemIdTask(id)).continueWith(executorService, x -> MapItems.pollFrom(x.getResult()));
     }
 
     @Override
     public Task<PollOpt> getPollOpt(long id) {
-        return (getMapOfItemIdTask(id)).continueWith(x -> MapItems.pollOptFrom(x.getResult()));
+        return (getMapOfItemIdTask(id)).continueWith(executorService, x -> MapItems.pollOptFrom(x.getResult()));
     }
 
     @Override
@@ -85,7 +87,7 @@ public class FirebaseHackerNewsService implements HackerNewsService {
 
     private Task<List<Long>> getStorySeriesTask(String topic) {
         Task<List<Long>> taskToGetSeries = hackerNews.child(topic).get()
-                .continueWith((result) -> result.getResult().getValue(indicatorListLong));
+                .continueWith(executorService, (result) -> result.getResult().getValue(indicatorListLong));
         return taskToGetSeries;
     }
 

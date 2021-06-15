@@ -7,6 +7,7 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
+import android.os.Environment;
 import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -27,6 +28,8 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
 import java.util.Objects;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import javax.inject.Inject;
 
@@ -46,6 +49,9 @@ public class CommentFragment extends Fragment {
 
     @Inject
     Gson gson;
+
+    @Inject
+    ExecutorService ioExecutorService;
 
     private Story story;
 
@@ -97,7 +103,8 @@ public class CommentFragment extends Fragment {
     CommentRecyclerAdapter adapter;
     FragmentCommentBinding binding;
 
-    public CommentFragment() { }
+    public CommentFragment() {
+    }
 
     public static CommentFragment newInstance(Gson gson, Story story) {
         CommentFragment fragment = new CommentFragment();
@@ -130,7 +137,7 @@ public class CommentFragment extends Fragment {
         Timber.d(bundle.getString(BUNDLE_STORY_JSON));
         story = gson.fromJson(bundle.getString(BUNDLE_STORY_JSON), GeneralStory.class);
 
-        adapter = new CommentRecyclerAdapter(getContext(), hackerNewsService, story);
+        adapter = new CommentRecyclerAdapter(getContext(), hackerNewsService, ioExecutorService, story);
         binding.recycleView.setAdapter(adapter);
         binding.recycleView.setLayoutManager(new LinearLayoutManager(getContext()));
 
