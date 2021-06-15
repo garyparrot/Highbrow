@@ -8,6 +8,7 @@
         <variable name="number" type="java.lang.Integer" />
         <variable name="fold" type="java.lang.Boolean" />
         <variable name="selectionMode" type="java.lang.Boolean" />
+        <variable name="isLoadMorePlaceholder" type="java.lang.Boolean" />
         <import type="android.view.View"/>
         <import type="com.github.garyparrot.highbrow.layout.present.ItemPresenter"/>
         <import type="android.text.Html"/>
@@ -23,6 +24,7 @@
 
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/card"
+            android:visibility="@{isLoadMorePlaceholder ? View.GONE : View.VISIBLE}"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:rippleColor="@android:color/transparent"
@@ -118,6 +120,18 @@
             </LinearLayout>
 
         </com.google.android.material.card.MaterialCardView>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/loadMoreButton"
+            android:visibility="@{isLoadMorePlaceholder ? View.VISIBLE : View.GONE}"
+            android:text="Load More ..."
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:backgroundTint="@color/white"
+            android:insetTop="0dp"
+            android:insetBottom="0dp"
+            style="@style/Widget.MaterialComponents.Button.TextButton"
+            />
 
     </LinearLayout>
 

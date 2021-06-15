@@ -55,6 +55,11 @@ public class CommentItem extends FrameLayout {
         eventBus = EventBus.getDefault();
         inflateView();
         childComments = new ArrayList<>();
+
+        this.setLayoutParams(new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+        ));
     }
 
     private void setCardFolded(boolean folded) {
@@ -194,4 +199,7 @@ public class CommentItem extends FrameLayout {
         binding.topLevelLinearLayout.setPadding((int)getResources().getDimension(R.dimen.commentIndent) * level, 0, 0, 0);
     }
 
+    public void setPlaceholderMode(boolean b) {
+        binding.setIsLoadMorePlaceholder(b);
+    }
 }

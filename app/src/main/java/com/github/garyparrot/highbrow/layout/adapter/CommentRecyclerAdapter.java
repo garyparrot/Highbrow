@@ -6,6 +6,7 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.github.garyparrot.highbrow.layout.util.CommentPlaceholder;
 import com.github.garyparrot.highbrow.layout.view.CommentItem;
 import com.github.garyparrot.highbrow.model.hacker.news.item.Comment;
 import com.github.garyparrot.highbrow.model.hacker.news.item.Item;
@@ -42,7 +43,12 @@ public class CommentRecyclerAdapter extends RecyclerView.Adapter<CommentRecycler
     private final Map<Long, Task<Comment>> commentStorage;
     private final Map<Long, Integer> commentDepth;
     private final Story story;
-    private final List<Long> targetIds;
+    /**
+     * The list of comment id in recycler view.
+     *
+     * suppose there are only two type of number in this list: {@link Long} or {@link com.github.garyparrot.highbrow.layout.util.CommentPlaceholder}.
+     */
+    private final List<Number> targetIds;
     private final HackerNewsService hackerNews;
     private final Context context;
     private final ExecutorService downloadExecutorService;
@@ -89,6 +95,9 @@ public class CommentRecyclerAdapter extends RecyclerView.Adapter<CommentRecycler
         }
         void setIndent(int level) { item.setIndentLevel(level); }
 
+        public void setPlaceholderMode(boolean b) {
+            item.setPlaceholderMode(b);
+        }
     }
 
     @NonNull
@@ -116,7 +125,8 @@ public class CommentRecyclerAdapter extends RecyclerView.Adapter<CommentRecycler
         final int requestId = getNextRequestId();
         holder.setCurrentRequestId(requestId);
 
-        long commentId = targetIds.get(position);
+        Number number = targetIds.get(position);
+        long commentId = targetIds.get(position).longValue();
 
         if(!commentStorage.containsKey(commentId)) {
             launchCommentDownloadTask(commentId);
@@ -127,6 +137,8 @@ public class CommentRecyclerAdapter extends RecyclerView.Adapter<CommentRecycler
         if(commentTask.isComplete()) {
             holder.setComment(commentTask.getResult());
             holder.setIndent(commentDepth.get(commentTask.getResult().getId()));
+            if(number instanceof CommentPlaceholder)
+                holder.setPlaceholderMode(true);
         } else {
             GeneraComment comment = GeneraComment.builder()
                     .author("")
