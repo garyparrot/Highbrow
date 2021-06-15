@@ -194,9 +194,5 @@ public class CommentItem extends FrameLayout {
     public void setIndentLevel(int level) {
         binding.topLevelLinearLayout.setPadding((int)getResources().getDimension(R.dimen.commentIndent) * level, 0, 0, 0);
     }
-    public void addChildCommentToLayout(CommentItem commentItem) {
-        childComments.add(commentItem);
-        binding.childCommentLinearLayout.addView(commentItem);
-    }
 
 }
