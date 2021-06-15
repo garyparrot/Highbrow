@@ -24,13 +24,12 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import lombok.AllArgsConstructor;
@@ -52,6 +51,7 @@ public class CommentRecyclerAdapter extends RecyclerView.Adapter<CommentRecycler
     private final HackerNewsService hackerNews;
     private final Context context;
     private final ExecutorService downloadExecutorService;
+    private final ExecutorService commentPreDownloadExecutorService;
     private final AtomicBoolean isWarmUpDone = new AtomicBoolean();
 
     private static int getNextRequestId() {
@@ -64,10 +64,12 @@ public class CommentRecyclerAdapter extends RecyclerView.Adapter<CommentRecycler
         this.commentDepth = Collections.synchronizedMap(new HashMap<>());
         this.story = story;
         this.downloadExecutorService = downloadExecutorService;
+        this.commentPreDownloadExecutorService = Executors.newSingleThreadExecutor();
+
         hackerNews = service;
         targetIds = Collections.synchronizedList(new ArrayList<>());
 
-        new Thread(new CommentPreDownloadLogic()).start();
+        commentPreDownloadExecutorService.submit(new CommentWarmUpLogic(story, 3, 30));
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
@@ -200,7 +202,20 @@ public class CommentRecyclerAdapter extends RecyclerView.Adapter<CommentRecycler
                 });
     }
 
-    class CommentPreDownloadLogic implements Runnable {
+    class CommentWarmUpLogic implements Runnable {
+
+        final HaveKids root;
+        final int warmUpCommentSize;
+        final int downloadLimit;
+
+        CommentWarmUpLogic(HaveKids root) {
+            this(root, root.getKids().size(), Integer.MAX_VALUE);
+        }
+        CommentWarmUpLogic(HaveKids root, int warmUp, int downloadLimit) {
+            this.root = root;
+            this.warmUpCommentSize = warmUp;
+            this.downloadLimit = downloadLimit;
+        }
 
         @Getter
         @AllArgsConstructor
@@ -212,15 +227,15 @@ public class CommentRecyclerAdapter extends RecyclerView.Adapter<CommentRecycler
         @Override
         public void run() {
             // Only attempt to download top n'th comments in this story
-            int warpUpCommentSize = Math.min(story.getKids().size(), 3);
+            int warmUpCandidateSize = Math.min(root.getKids().size(), this.warmUpCommentSize);
             // Only attempt to send at most n download request
-            int downloadLimit = 30;
+            int downloadLimit = this.downloadLimit;
 
             int round = 0;
 
             try {
                 // Perform warm up
-                List<Long> warmUpCandidate = story.getKids().subList(0, warpUpCommentSize);
+                List<Long> warmUpCandidate = root.getKids().subList(0, warmUpCandidateSize);
                 while(warmUpCandidate.size() > 0 && downloadLimit > 0) {
                     Timber.d("Warm up round #%d: candidates %d, remaining quota %d", ++round, warmUpCandidate.size(), downloadLimit);
                     DownloadResult downloadResult = preDownloadComments(warmUpCandidate, downloadLimit);
@@ -231,8 +246,8 @@ public class CommentRecyclerAdapter extends RecyclerView.Adapter<CommentRecycler
                 e.printStackTrace();
             } finally {
                 List<Long> preloadedComments = new ArrayList<>();
-                List<Long> topPart = story.getKids().subList(0, warpUpCommentSize);
-                List<Long> bottomPart = story.getKids().subList(warpUpCommentSize, story.getKids().size());
+                List<Long> topPart = root.getKids().subList(0, warmUpCandidateSize);
+                List<Long> bottomPart = root.getKids().subList(warmUpCandidateSize, root.getKids().size());
 
                 for (Long aLong : topPart) {
                     Comment comment = commentStorage.get(aLong).getResult();
@@ -297,5 +312,4 @@ public class CommentRecyclerAdapter extends RecyclerView.Adapter<CommentRecycler
             }
         }
     }
-
 }
