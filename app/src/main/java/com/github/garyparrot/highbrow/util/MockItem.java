@@ -3,16 +3,15 @@ package com.github.garyparrot.highbrow.util;
 import com.github.garyparrot.highbrow.model.hacker.news.item.Comment;
 import com.github.garyparrot.highbrow.model.hacker.news.item.ItemType;
 import com.github.garyparrot.highbrow.model.hacker.news.item.Story;
-import com.github.garyparrot.highbrow.model.hacker.news.item.general.GeneraComment;
+import com.github.garyparrot.highbrow.model.hacker.news.item.general.GeneralComment;
 import com.github.garyparrot.highbrow.model.hacker.news.item.general.GeneralStory;
 
-import java.util.Collection;
 import java.util.Collections;
 
 public class MockItem {
 
     public static Comment getEmptyComment() {
-        return GeneraComment.builder()
+        return GeneralComment.builder()
                 .author("")
                 .id(0)
                 .kids(Collections.emptyList())

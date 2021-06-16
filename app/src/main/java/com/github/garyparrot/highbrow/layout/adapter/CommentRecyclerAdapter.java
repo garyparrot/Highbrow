@@ -12,7 +12,8 @@ import com.github.garyparrot.highbrow.model.hacker.news.item.Comment;
 import com.github.garyparrot.highbrow.model.hacker.news.item.Item;
 import com.github.garyparrot.highbrow.model.hacker.news.item.ItemType;
 import com.github.garyparrot.highbrow.model.hacker.news.item.Story;
-import com.github.garyparrot.highbrow.model.hacker.news.item.general.GeneraComment;
+import com.github.garyparrot.highbrow.model.hacker.news.item.general.GeneralComment;
+import com.github.garyparrot.highbrow.model.hacker.news.item.general.NullComment;
 import com.github.garyparrot.highbrow.model.hacker.news.item.modifier.HaveKids;
 import com.github.garyparrot.highbrow.service.HackerNewsService;
 import com.github.garyparrot.highbrow.util.MockItem;
@@ -21,14 +22,10 @@ import com.google.android.gms.tasks.Tasks;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.time.format.ResolverStyle;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -39,15 +36,10 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.locks.AbstractQueuedSynchronizer;
-import java.util.concurrent.locks.Condition;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -59,6 +51,7 @@ public class CommentRecyclerAdapter extends RecyclerView.Adapter<CommentRecycler
     private final Map<Long, Task<Comment>> commentStorage;
     private final Map<Long, Integer> commentDepth;
     private final Map<Long, Boolean> commentFolding;
+    private final Map<Long, Long> commentBloodline;
     private final Story story;
     /**
      * The list of comment id in recycler view.
@@ -81,6 +74,7 @@ public class CommentRecyclerAdapter extends RecyclerView.Adapter<CommentRecycler
         this.commentStorage = Collections.synchronizedMap(new HashMap<>());
         this.commentDepth = Collections.synchronizedMap(new HashMap<>());
         this.commentFolding = Collections.synchronizedMap(new HashMap<>());
+        this.commentBloodline = Collections.synchronizedMap(new HashMap<>());
         this.story = story;
         this.downloadExecutorService = downloadExecutorService;
         this.commentPreDownloadExecutorService = Executors.newFixedThreadPool(5);
@@ -187,7 +181,7 @@ public class CommentRecyclerAdapter extends RecyclerView.Adapter<CommentRecycler
             if(number instanceof CommentPlaceholder)
                 holder.setPlaceholderMode(true);
         } else {
-            GeneraComment comment = GeneraComment.builder()
+            GeneralComment comment = GeneralComment.builder()
                     .author("")
                     .id(0)
                     .kids(Collections.emptyList())
@@ -329,18 +323,28 @@ public class CommentRecyclerAdapter extends RecyclerView.Adapter<CommentRecycler
     private Task<Comment> launchCommentDownloadTaskInternal(final long commentId) {
         return hackerNews.getComment(commentId)
                 .continueWith(downloadExecutorService, taskInstance -> {
-                    final long saved = commentId;
                     Comment comment = taskInstance.getResult();
-                    if(comment.getParentId() == story.getId()) {
+                    if(comment == null) {
+                        // try to tracking down the parent of this comment
+                        long myParent = commentBloodline.containsKey(commentId) ? commentBloodline.get(commentId) : story.getId();
+                        commentDepth.put(commentId, commentDepth.get(myParent) + 1);
+                        commentFolding.put(commentId, false);
+                        comment = new NullComment(commentId, myParent);
+                    } else if(comment.getParentId() == story.getId()) {
                         commentDepth.put(comment.getId(), 0);
                         commentFolding.put(comment.getId(), false);
                     } else {
                         commentDepth.put(comment.getId(), commentDepth.get(comment.getParentId()) + 1);
                         commentFolding.put(comment.getId(), false);
                     }
-                    return taskInstance.getResult();
+
+                    for (Long kid : comment.getKids()) {
+                        commentBloodline.put(kid, comment.getId());
+                    }
+                    return comment;
                 });
     }
+
 
     class CommentWarmUpLogic implements Runnable {
 

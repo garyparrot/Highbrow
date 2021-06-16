@@ -10,7 +10,7 @@ import lombok.Data;
 
 @Data
 @Builder
-public class GeneraComment implements Comment {
+public class GeneralComment implements Comment {
 
     String author;
     long id;
