@@ -121,6 +121,7 @@ public class CommentRecyclerAdapter extends RecyclerView.Adapter<CommentRecycler
         void setToolbarFolded(boolean isFolded) {
             item.setToolBarFold(isFolded, false);
         }
+        void setCommentFailure(boolean happened) { item.setCommentFailure(happened); }
 
         public void setPlaceholderMode(boolean b) {
             item.setPlaceholderMode(b);
@@ -165,6 +166,8 @@ public class CommentRecyclerAdapter extends RecyclerView.Adapter<CommentRecycler
         Task<Comment> commentTask = commentStorage.get(commentId);
         Objects.requireNonNull(commentTask);
         if(commentTask.isComplete()) {
+            if(commentTask.getResult() instanceof NullComment)
+                holder.setCommentFailure(true);
             holder.setComment(commentTask.getResult());
             holder.setIndent(commentDepth.get(commentTask.getResult().getId()));
             holder.setFolding(commentFolding.get(commentId));

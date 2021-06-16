@@ -225,6 +225,10 @@ public class CommentItem extends FrameLayout {
         binding.setIsLoadMorePlaceholder(b);
     }
 
+    public void setCommentFailure(boolean happened) {
+        binding.setIsCommentBroken(happened);
+    }
+
     @FunctionalInterface
     public interface OnCommentFoldingStateChange {
         void onFoldingStateChanged(boolean isFolded);

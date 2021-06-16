@@ -10,7 +10,9 @@
         <variable name="fold" type="java.lang.Boolean" />
         <variable name="selectionMode" type="java.lang.Boolean" />
         <variable name="isLoadMorePlaceholder" type="java.lang.Boolean" />
+        <variable name="isCommentBroken" type="java.lang.Boolean" />
         <import type="android.view.View"/>
+        <import type="android.widget.TextView"/>
         <import type="com.github.garyparrot.highbrow.layout.present.ItemPresenter"/>
         <import type="android.text.Html"/>
     </data>
@@ -49,7 +51,7 @@
 
                     <com.google.android.material.textview.MaterialTextView
                         android:id="@+id/textViewAuthor"
-                        android:text="@{item != null ? item.author: ``}"
+                        android:text="@{!isCommentBroken ? item.author: `[Dev Oops]`}"
                         tools:text="garyparrot"
                         style="@style/TextAppearance.MaterialComponents.Subtitle2"
                         app:layout_constraintTop_toTopOf="parent"
@@ -92,7 +94,8 @@
                         app:layout_constraintTop_toBottomOf="@id/textViewAuthor"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="@{ItemPresenter.renderText(item, fold)}"
+                        android:text="@{!isCommentBroken ? ItemPresenter.renderText(item, fold) : ItemPresenter.devOopsStatement()}"
+                        android:textAlignment="@{!isCommentBroken ? TextView.TEXT_ALIGNMENT_VIEW_START : TextView.TEXT_ALIGNMENT_CENTER }"
                         tools:text="@string/lorem"
                         />
 

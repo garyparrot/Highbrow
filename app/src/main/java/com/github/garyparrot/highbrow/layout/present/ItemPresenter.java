@@ -24,6 +24,10 @@ public class ItemPresenter {
         return "";
     }
 
+    public static String devOopsStatement() {
+        return " ¯\\_(ツ)_/¯ \n\nFailed to load this comment, sad.";
+    }
+
     public static String toScoreString(Story item) {
         return String.format(Locale.ENGLISH, "%dp",item.getScore());
     }
@@ -50,6 +54,9 @@ public class ItemPresenter {
     }
 
     public static String getPastedTime(long momentSecond) {
+
+        if(momentSecond == 0)
+            return "";
 
         long nowSecond = System.currentTimeMillis() / 1000;
 
