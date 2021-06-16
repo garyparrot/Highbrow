@@ -108,27 +108,41 @@ public class CommentItem extends FrameLayout {
         }
 
         // Apply animation on the toolbar layout
+        setToolBarFold(!isToolBarFold, true);
+    }
+
+    public void setToolBarFold(boolean isFolded, boolean playAnimation) {
         float targetHeight = getResources().getDimension(R.dimen.commentToolBarHeight);
-        if(isToolBarFold) {
-            ValueAnimator animator = ValueAnimator.ofInt(0, (int)targetHeight);
+
+        if(!playAnimation) {
+            ViewGroup.LayoutParams layoutParams = binding.commentToolBar.getLayoutParams();
+            layoutParams.height = isFolded ? 0 : (int)targetHeight;
+            binding.commentToolBar.setLayoutParams(layoutParams);
+            isToolBarFold = isFolded;
+            return;
+        }
+
+        ViewGroup.LayoutParams current = binding.commentToolBar.getLayoutParams();
+        if(!isFolded) {
+            ValueAnimator animator = ValueAnimator.ofInt(current.height, (int)targetHeight);
             animator.addUpdateListener((valueAnimator) -> {
                 ViewGroup.LayoutParams layoutParams = binding.commentToolBar.getLayoutParams();
                 layoutParams.height = (int) valueAnimator.getAnimatedValue();
                 binding.commentToolBar.setLayoutParams(layoutParams);
             });
-            animator.setDuration(300);
+            animator.setDuration(playAnimation ? 300 : 1);
             animator.start();
-            isToolBarFold = !isToolBarFold;
+            isToolBarFold = false;
         } else {
-            ValueAnimator animator = ValueAnimator.ofInt((int)targetHeight, 0);
+            ValueAnimator animator = ValueAnimator.ofInt(current.height, 0);
             animator.addUpdateListener((valueAnimator) -> {
                 ViewGroup.LayoutParams layoutParams = binding.commentToolBar.getLayoutParams();
                 layoutParams.height = (int) valueAnimator.getAnimatedValue();
                 binding.commentToolBar.setLayoutParams(layoutParams);
             });
-            animator.setDuration(300);
+            animator.setDuration(playAnimation ? 300 : 1);
             animator.start();
-            isToolBarFold = !isToolBarFold;
+            isToolBarFold = true;
         }
     }
 

@@ -124,6 +124,9 @@ public class CommentRecyclerAdapter extends RecyclerView.Adapter<CommentRecycler
         void setFoldingStateChangeListener(CommentItem.OnCommentFoldingStateChange listener) {
             item.setOnCommentFoldingStateChangeListener(listener);
         }
+        void setToolbarFolded(boolean isFolded) {
+            item.setToolBarFold(isFolded, false);
+        }
 
         public void setPlaceholderMode(boolean b) {
             item.setPlaceholderMode(b);
@@ -172,12 +175,14 @@ public class CommentRecyclerAdapter extends RecyclerView.Adapter<CommentRecycler
             holder.setIndent(commentDepth.get(commentTask.getResult().getId()));
             holder.setFolding(commentFolding.get(commentId));
             holder.setChildCommentNumber(countCommentChildren(commentTask.getResult()));
+            holder.setToolbarFolded(true);
             holder.setFoldingStateChangeListener((isFolded) -> {
                 if(isFolded)
                     hideCommentChildren(commentTask.getResult());
                 else
                     showResolvedCommentChildren(commentTask.getResult());
                 commentFolding.put(commentId, isFolded);
+                holder.setToolbarFolded(true);
             });
             if(number instanceof CommentPlaceholder)
                 holder.setPlaceholderMode(true);
