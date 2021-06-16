@@ -21,16 +21,28 @@ import com.google.android.gms.tasks.Tasks;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.time.format.ResolverStyle;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Queue;
+import java.util.Stack;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.AbstractQueuedSynchronizer;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -64,7 +76,7 @@ public class CommentRecyclerAdapter extends RecyclerView.Adapter<CommentRecycler
         this.commentDepth = Collections.synchronizedMap(new HashMap<>());
         this.story = story;
         this.downloadExecutorService = downloadExecutorService;
-        this.commentPreDownloadExecutorService = Executors.newSingleThreadExecutor();
+        this.commentPreDownloadExecutorService = Executors.newFixedThreadPool(5);
 
         hackerNews = service;
         targetIds = Collections.synchronizedList(new ArrayList<>());
@@ -131,7 +143,10 @@ public class CommentRecyclerAdapter extends RecyclerView.Adapter<CommentRecycler
         long commentId = targetIds.get(position).longValue();
 
         if(!commentStorage.containsKey(commentId)) {
-            launchCommentDownloadTask(commentId);
+            launchCommentDownloadTask(commentId)
+                    .addOnSuccessListener(comment -> {
+                        commentPreDownloadExecutorService.submit(new CommentFullyDownloadLogic(comment));
+                    });
         }
 
         Task<Comment> commentTask = commentStorage.get(commentId);
@@ -176,9 +191,10 @@ public class CommentRecyclerAdapter extends RecyclerView.Adapter<CommentRecycler
 
         return commentTask;
     }
-    private Task<Comment> launchCommentDownloadTaskInternal(long commentId) {
+    private Task<Comment> launchCommentDownloadTaskInternal(final long commentId) {
         return hackerNews.getComment(commentId)
                 .continueWith(downloadExecutorService, taskInstance -> {
+                    final long saved = commentId;
                     Comment comment = taskInstance.getResult();
                     if(comment.getParentId() == story.getId()) {
                         commentDepth.put(comment.getId(), 0);
@@ -186,19 +202,6 @@ public class CommentRecyclerAdapter extends RecyclerView.Adapter<CommentRecycler
                         commentDepth.put(comment.getId(), commentDepth.get(comment.getParentId()) + 1);
                     }
                     return taskInstance.getResult();
-                })
-                .addOnSuccessListener((comment) -> {
-                    // During warm up process, we won't notify adapter that there is a change.
-                    // Frequently change will likely to cause CPU intensive re-draw event on main thread
-                    if(isWarmUpDone.get()) {
-                        int index;
-                        // No need to sync this since we are running on main thread at this moment.
-                        index = targetIds.indexOf(comment.getId());
-                        targetIds.addAll(index + 1, comment.getKids());
-
-                        notifyItemChanged(index);
-                        notifyItemRangeInserted(index + 1, comment.getKids().size());
-                    }
                 });
     }
 
@@ -311,5 +314,89 @@ public class CommentRecyclerAdapter extends RecyclerView.Adapter<CommentRecycler
                 addCommentToListInDfsOrder(targetList, commentTask.getResult());
             }
         }
+
+    }
+
+    class CommentFullyDownloadLogic implements Runnable {
+
+        final Comment root;
+
+        CommentFullyDownloadLogic(Comment root) {
+            this.root = root;
+        }
+
+        @Override
+        public void run() {
+            // Step 1: Download everything
+            ensureCommentHierarchyDownloaded(root);
+
+            // Step 2: collect result into dfs order id list
+            List<Long> dfsOrder = new ArrayList<>();
+            addCommentToListInDfsOrder(dfsOrder, root);
+
+            Tasks.forResult(dfsOrder)
+                    .addOnSuccessListener(commentLinear -> {
+                        synchronized (targetIds) {
+                            int index = targetIds.indexOf(root.getId());
+                            targetIds.remove(root.getId());
+                            notifyItemRemoved(index);
+                            targetIds.addAll(index, commentLinear);
+                            notifyItemRangeInserted(index, commentLinear.size());
+                        }
+                    });
+        }
+
+        private void ensureCommentHierarchyDownloaded(Comment comment) {
+            try {
+                Queue<Long> availableTaskQueue = new LinkedBlockingQueue<>(comment.getKids());
+                BlockingQueue<Long> taskDoneQueue = new LinkedBlockingQueue<>();
+                AtomicInteger pendingTasks = new AtomicInteger();
+
+                // We only leave when is no more available comment for download, and all pending task is done
+                while(!availableTaskQueue.isEmpty() || pendingTasks.get() != 0) {
+                    // Accept & Launch tasks
+                    while(availableTaskQueue.size() > 0) {
+                        Long commentId = availableTaskQueue.poll();
+                        launchCommentDownloadTask(commentId)
+                                .addOnSuccessListener(downloadExecutorService, command -> {
+                                    taskDoneQueue.add(commentId);
+                                })
+                                .addOnFailureListener(downloadExecutorService, e -> {
+                                    e.printStackTrace();
+                                    taskDoneQueue.add(commentId);
+                                });
+                        pendingTasks.incrementAndGet();
+                    }
+
+                    // some job is done because we receive the signal
+                    while(taskDoneQueue.size() > 0) {
+                        Long poll = taskDoneQueue.poll(1, TimeUnit.SECONDS);
+                        Comment result = commentStorage.get(poll).getResult();
+                        if(result != null)
+                            availableTaskQueue.addAll(result.getKids());
+                        pendingTasks.decrementAndGet();
+                    }
+                }
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+                return;
+            }
+        }
+
+        // TODO: Tech debt, duplicated function
+        private <T extends Item & HaveKids> void addCommentToListInDfsOrder(List<Long> targetList, T root) {
+            // Add myself
+            targetList.add(root.getId());
+
+            // DFS transversal
+            for (Long kid : root.getKids()) {
+                Task<Comment> commentTask = commentStorage.get(kid);
+                if(commentTask == null) {
+                    continue;       // This comment is not load.
+                }
+                addCommentToListInDfsOrder(targetList, commentTask.getResult());
+            }
+        }
+
     }
 }
