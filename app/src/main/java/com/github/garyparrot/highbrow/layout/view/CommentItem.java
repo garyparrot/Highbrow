@@ -63,13 +63,16 @@ public class CommentItem extends FrameLayout {
         ));
     }
 
-    private void setCardFolded(boolean folded) {
+    public void setCardFolded(boolean folded, boolean shouldEmitEvent) {
         this.isCardFolded = folded;
         binding.setFold(this.isCardFolded);
 
         ViewGroup.LayoutParams layoutParams = binding.commentToolBar.getLayoutParams();
         ViewGroup.LayoutParams params = new LinearLayout.LayoutParams(layoutParams.width, 0);
         binding.commentToolBar.setLayoutParams(params);
+
+        if (onCommentFoldingStateChangeListener != null && shouldEmitEvent)
+            onCommentFoldingStateChangeListener.onFoldingStateChanged(folded);
     }
 
     private void inflateView() {
@@ -91,10 +94,8 @@ public class CommentItem extends FrameLayout {
     }
 
     private boolean onLongClick(View view) {
-        boolean before = isCardFolded;
-        boolean after = !before;
-        setCardFolded(after);
-        onCommentFoldingStateChangeListener.onFoldingStateChanged(after);
+        boolean after = !isCardFolded;
+        setCardFolded(after, true);
         return true;
     }
 
@@ -102,7 +103,7 @@ public class CommentItem extends FrameLayout {
 
         // if the card is folded, unfold it first
         if(isCardFolded) {
-            setCardFolded(false);
+            setCardFolded(false, true);
             return;
         }
 

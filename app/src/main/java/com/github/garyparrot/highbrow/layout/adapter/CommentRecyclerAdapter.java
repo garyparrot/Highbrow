@@ -24,6 +24,7 @@ import org.jetbrains.annotations.NotNull;
 import java.time.format.ResolverStyle;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -57,6 +58,7 @@ public class CommentRecyclerAdapter extends RecyclerView.Adapter<CommentRecycler
     private static int nextRequestId = 0;
     private final Map<Long, Task<Comment>> commentStorage;
     private final Map<Long, Integer> commentDepth;
+    private final Map<Long, Boolean> commentFolding;
     private final Story story;
     /**
      * The list of comment id in recycler view.
@@ -78,6 +80,7 @@ public class CommentRecyclerAdapter extends RecyclerView.Adapter<CommentRecycler
         this.context = context;
         this.commentStorage = Collections.synchronizedMap(new HashMap<>());
         this.commentDepth = Collections.synchronizedMap(new HashMap<>());
+        this.commentFolding = Collections.synchronizedMap(new HashMap<>());
         this.story = story;
         this.downloadExecutorService = downloadExecutorService;
         this.commentPreDownloadExecutorService = Executors.newFixedThreadPool(5);
@@ -112,6 +115,9 @@ public class CommentRecyclerAdapter extends RecyclerView.Adapter<CommentRecycler
             item.setComment(comment);
         }
         void setIndent(int level) { item.setIndentLevel(level); }
+        void setFolding(boolean isFolded) {
+            item.setCardFolded(isFolded, false);
+        }
         void setFoldingStateChangeListener(CommentItem.OnCommentFoldingStateChange listener) {
             item.setOnCommentFoldingStateChangeListener(listener);
         }
@@ -161,11 +167,13 @@ public class CommentRecyclerAdapter extends RecyclerView.Adapter<CommentRecycler
         if(commentTask.isComplete()) {
             holder.setComment(commentTask.getResult());
             holder.setIndent(commentDepth.get(commentTask.getResult().getId()));
+            holder.setFolding(commentFolding.get(commentId));
             holder.setFoldingStateChangeListener((isFolded) -> {
                 if(isFolded)
                     hideCommentChildren(commentTask.getResult());
                 else
                     showResolvedCommentChildren(commentTask.getResult());
+                commentFolding.put(commentId, isFolded);
             });
             if(number instanceof CommentPlaceholder)
                 holder.setPlaceholderMode(true);
@@ -291,8 +299,10 @@ public class CommentRecyclerAdapter extends RecyclerView.Adapter<CommentRecycler
                     Comment comment = taskInstance.getResult();
                     if(comment.getParentId() == story.getId()) {
                         commentDepth.put(comment.getId(), 0);
+                        commentFolding.put(comment.getId(), false);
                     } else {
                         commentDepth.put(comment.getId(), commentDepth.get(comment.getParentId()) + 1);
+                        commentFolding.put(comment.getId(), false);
                     }
                     return taskInstance.getResult();
                 });
