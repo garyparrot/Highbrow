@@ -14,11 +14,15 @@ import com.github.garyparrot.highbrow.room.dao.SavedStoryDao;
 import com.github.garyparrot.highbrow.service.HackerNewsService;
 import com.github.garyparrot.highbrow.util.MockItem;
 import com.github.garyparrot.highbrow.util.SaveResult;
+import com.google.android.gms.tasks.Task;
 import com.google.gson.Gson;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import dagger.hilt.android.AndroidEntryPoint;
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
@@ -28,6 +32,7 @@ import timber.log.Timber;
 public class StoryRecyclerAdapter extends RecyclerView.Adapter<StoryRecyclerAdapter.ViewHolder> {
 
     private static int nextRequestId = 0;
+    private final Map<Long, Task<Story>> storyStorage = Collections.synchronizedMap(new HashMap<>());
     private final List<Long> targetIds;
     private final HackerNewsService hackerNews;
     private final SavedStoryDao savedStoryDao;
@@ -106,28 +111,43 @@ public class StoryRecyclerAdapter extends RecyclerView.Adapter<StoryRecyclerAdap
         final int requestId = getNextRequestId();
         holder.setCurrentRequestId(requestId);
 
-        // Request the real story and replace the mock story in async way
-        hackerNews.getStory(targetIds.get(position))
-                .addOnCompleteListener(task -> {
-                    // Test to see if the view holder in this moment point to the right data
-                    if(holder.getCurrentRequestId() == requestId) {
-                        Story targetStory = task.getResult();
-                        if(targetStory == null) {
-                            Timber.e("Bad story at id %d", targetIds.get(position));
-                            return;
-                        }
-                        holder.setStory(targetStory);
 
-                        // Update saved info
-                        savedStoryDao.isSavedStoryExists(targetIds.get(position))
-                                .subscribeOn(Schedulers.io())
-                                .observeOn(AndroidSchedulers.mainThread())
-                                .subscribe((isSaved) -> {
-                                    if(holder.getCurrentRequestId() == requestId)
-                                        holder.setSaved(isSaved);
-                                }, Throwable::printStackTrace);
+        synchronized (storyStorage) {
+            Task<Story> storyTask;
+
+            if(storyStorage.containsKey(targetIds.get(position)))
+                storyTask= storyStorage.get(targetIds.get(position));
+            else
+                storyTask = newStoryTask(targetIds.get(position));
+            // Request the real story and replace the mock story in async way
+
+           storyTask.addOnCompleteListener(task -> {
+                // Test to see if the view holder in this moment point to the right data
+                if (holder.getCurrentRequestId() == requestId) {
+                    Story targetStory = task.getResult();
+                    if (targetStory == null) {
+                        Timber.e("Bad story at id %d", targetIds.get(position));
+                        return;
                     }
-                });
+                    holder.setStory(targetStory);
+
+                    // Update saved info
+                    savedStoryDao.isSavedStoryExists(targetIds.get(position))
+                            .subscribeOn(Schedulers.io())
+                            .observeOn(AndroidSchedulers.mainThread())
+                            .subscribe((isSaved) -> {
+                                if (holder.getCurrentRequestId() == requestId)
+                                    holder.setSaved(isSaved);
+                            }, Throwable::printStackTrace);
+                }
+            });
+        }
+    }
+
+    private Task<Story> newStoryTask(Long aLong) {
+        Task<Story> story = hackerNews.getStory(aLong);
+        storyStorage.put(aLong, story);
+        return story;
     }
 
     @Override
