@@ -203,6 +203,9 @@ public class CommentItem extends FrameLayout {
     public void setIndentLevel(int level) {
         binding.topLevelLinearLayout.setPadding((int)getResources().getDimension(R.dimen.commentIndent) * level, 0, 0, 0);
     }
+    public void setChildCommentsNumber(int number) {
+        binding.setChildCount(number);
+    }
 
     public void setPlaceholderMode(boolean b) {
         binding.setIsLoadMorePlaceholder(b);

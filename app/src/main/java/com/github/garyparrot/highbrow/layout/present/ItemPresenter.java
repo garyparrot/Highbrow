@@ -12,6 +12,18 @@ import java.util.Locale;
 
 public class ItemPresenter {
 
+    public static String friendFoldingHint(boolean isFolded, int childCount) {
+        if(isFolded) {
+            if(childCount == 1)
+                return "(1 comment folded)";
+            else if(childCount > 1)
+                return String.format("(%d comments folded)", childCount);
+            else
+                return "(Folded)";
+        }
+        return "";
+    }
+
     public static String toScoreString(Story item) {
         return String.format(Locale.ENGLISH, "%dp",item.getScore());
     }

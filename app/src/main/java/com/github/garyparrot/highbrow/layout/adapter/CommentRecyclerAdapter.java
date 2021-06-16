@@ -118,6 +118,9 @@ public class CommentRecyclerAdapter extends RecyclerView.Adapter<CommentRecycler
         void setFolding(boolean isFolded) {
             item.setCardFolded(isFolded, false);
         }
+        void setChildCommentNumber(int number) {
+            item.setChildCommentsNumber(number);
+        }
         void setFoldingStateChangeListener(CommentItem.OnCommentFoldingStateChange listener) {
             item.setOnCommentFoldingStateChangeListener(listener);
         }
@@ -168,6 +171,7 @@ public class CommentRecyclerAdapter extends RecyclerView.Adapter<CommentRecycler
             holder.setComment(commentTask.getResult());
             holder.setIndent(commentDepth.get(commentTask.getResult().getId()));
             holder.setFolding(commentFolding.get(commentId));
+            holder.setChildCommentNumber(countCommentChildren(commentTask.getResult()));
             holder.setFoldingStateChangeListener((isFolded) -> {
                 if(isFolded)
                     hideCommentChildren(commentTask.getResult());
@@ -271,6 +275,10 @@ public class CommentRecyclerAdapter extends RecyclerView.Adapter<CommentRecycler
         }
 
         return children;
+    }
+
+    private int countCommentChildren(Comment comment) {
+        return getCommentChildrenIds(comment).size();
     }
 
     @Override
