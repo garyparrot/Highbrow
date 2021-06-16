@@ -7,6 +7,8 @@ import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.WebChromeClient;
+import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
 import com.github.garyparrot.highbrow.databinding.FragmentBrowserBinding;
@@ -47,6 +49,15 @@ public class BrowserFragment extends Fragment {
         Bundle bundle = getArguments();
 
         binding.webView.setWebViewClient(new WebViewClient());
+        binding.webView.setWebChromeClient(new WebChromeClient() {
+            @Override
+            public void onProgressChanged(WebView view, int newProgress) {
+                binding.progressBar.setProgress(newProgress);
+
+                if(newProgress == 100)
+                    binding.progressBar.setVisibility(View.GONE);
+            }
+        });
         binding.webView.loadUrl(bundle.getString(BUNDLE_URL));
 
         return binding.getRoot();
