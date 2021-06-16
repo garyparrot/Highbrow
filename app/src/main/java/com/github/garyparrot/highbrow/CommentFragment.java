@@ -6,6 +6,7 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.os.Environment;
 import android.text.Html;
@@ -26,6 +27,7 @@ import com.google.gson.Gson;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 import java.util.concurrent.ExecutorService;
@@ -140,6 +142,18 @@ public class CommentFragment extends Fragment {
         adapter = new CommentRecyclerAdapter(getContext(), hackerNewsService, ioExecutorService, story);
         binding.recycleView.setAdapter(adapter);
         binding.recycleView.setLayoutManager(new LinearLayoutManager(getContext()));
+        binding.recycleView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrolled(@NonNull @NotNull RecyclerView recyclerView, int dx, int dy) {
+                LinearLayoutManager layoutManager = ((LinearLayoutManager) binding.recycleView.getLayoutManager());
+                int lastVisibleItemPosition = layoutManager.findLastVisibleItemPosition();
+
+                int ensureTo = Math.min(lastVisibleItemPosition + 20, adapter.getItemCount());
+
+                for(int i = lastVisibleItemPosition + 1; i < ensureTo; i++)
+                    adapter.ensureItemResolved(i);
+            }
+        });
 
         return binding.getRoot();
     }

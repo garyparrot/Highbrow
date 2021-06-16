@@ -296,9 +296,30 @@ public class CommentRecyclerAdapter extends RecyclerView.Adapter<CommentRecycler
         }
     }
 
+    /**
+     * Ensure the item at given position is completely(including all its child comments) is load.
+     * If item is not load yet, we will launch a task to download it.
+     *
+     * @param position the item position that you want to ensure load
+     */
+    public void ensureItemResolved(int position) {
+        long commentId = targetIds.get(position).longValue();
+
+        synchronized (commentStorage) {
+            if(commentStorage.containsKey(commentId))
+                // comment either downloaded or is in progress
+                return;
+
+            launchCommentDownloadTask(commentId)
+                    .addOnSuccessListener((comment) -> {
+                        commentPreDownloadExecutorService.submit(new CommentFullyDownloadLogic(comment));
+                    });
+        }
+    }
+
     private Task<Comment> launchCommentDownloadTask(long commentId) {
         if(commentStorage.containsKey(commentId))
-            return commentStorage.get(commentId);
+            return Tasks.forResult(commentStorage.get(commentId).getResult());
 
         Task<Comment> commentTask = launchCommentDownloadTaskInternal(commentId);
         commentStorage.put(commentId, commentTask);
