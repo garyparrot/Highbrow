@@ -2,15 +2,12 @@ package com.github.garyparrot.highbrow.layout.view;
 
 import android.animation.ValueAnimator;
 import android.content.Context;
-import android.content.Intent;
-import android.text.Html;
 import android.view.ActionMode;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.AccelerateInterpolator;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 
@@ -22,14 +19,12 @@ import com.github.garyparrot.highbrow.event.DictionaryLookupEvent;
 import com.github.garyparrot.highbrow.event.ShareCommentRequest;
 import com.github.garyparrot.highbrow.event.TextToSpeechRequestEvent;
 import com.github.garyparrot.highbrow.model.hacker.news.item.Comment;
-import com.github.garyparrot.highbrow.model.hacker.news.item.Story;
 import com.github.garyparrot.highbrow.service.HackerNewsService;
 
 import org.greenrobot.eventbus.EventBus;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CountDownLatch;
 
 import javax.inject.Inject;
 
@@ -49,6 +44,12 @@ public class CommentItem extends FrameLayout {
     private List<CommentItem> childComments;
     private boolean isToolBarFold = true;
     private boolean isCardFolded = false;
+
+    public void setOnCommentFoldingStateChangeListener(OnCommentFoldingStateChange callback) {
+        this.onCommentFoldingStateChangeListener = callback;
+    }
+
+    private OnCommentFoldingStateChange onCommentFoldingStateChangeListener;
 
     public CommentItem(@NonNull Context context) {
         super(context);
@@ -73,7 +74,7 @@ public class CommentItem extends FrameLayout {
 
     private void inflateView() {
         binding = CommentCardViewBinding.inflate(LayoutInflater.from(getContext()), this, true);
-        binding.commentText.setCustomSelectionActionModeCallback(getCallback());
+        binding.commentText.setCustomSelectionActionModeCallback(getOnCommentFoldingStateChangeListener());
         binding.card.setOnClickListener(this::onCardClicked);
         binding.card.setOnLongClickListener(this::onLongClick);
         binding.setSelectionMode(false);
@@ -90,7 +91,10 @@ public class CommentItem extends FrameLayout {
     }
 
     private boolean onLongClick(View view) {
-        setCardFolded(!isCardFolded);
+        boolean before = isCardFolded;
+        boolean after = !before;
+        setCardFolded(after);
+        onCommentFoldingStateChangeListener.onFoldingStateChanged(after);
         return true;
     }
 
@@ -127,7 +131,7 @@ public class CommentItem extends FrameLayout {
         }
     }
 
-    private ActionMode.Callback getCallback() {
+    private ActionMode.Callback getOnCommentFoldingStateChangeListener() {
         return new ActionMode.Callback() {
 
             private boolean isCustomMenuItemPrepared = false;
@@ -201,5 +205,10 @@ public class CommentItem extends FrameLayout {
 
     public void setPlaceholderMode(boolean b) {
         binding.setIsLoadMorePlaceholder(b);
+    }
+
+    @FunctionalInterface
+    public interface OnCommentFoldingStateChange {
+        void onFoldingStateChanged(boolean isFolded);
     }
 }

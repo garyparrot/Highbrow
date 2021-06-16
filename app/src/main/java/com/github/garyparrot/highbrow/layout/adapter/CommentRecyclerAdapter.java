@@ -23,12 +23,16 @@ import org.jetbrains.annotations.NotNull;
 
 import java.time.format.ResolverStyle;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Queue;
+import java.util.Set;
 import java.util.Stack;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CountDownLatch;
@@ -108,6 +112,9 @@ public class CommentRecyclerAdapter extends RecyclerView.Adapter<CommentRecycler
             item.setComment(comment);
         }
         void setIndent(int level) { item.setIndentLevel(level); }
+        void setFoldingStateChangeListener(CommentItem.OnCommentFoldingStateChange listener) {
+            item.setOnCommentFoldingStateChangeListener(listener);
+        }
 
         public void setPlaceholderMode(boolean b) {
             item.setPlaceholderMode(b);
@@ -154,6 +161,12 @@ public class CommentRecyclerAdapter extends RecyclerView.Adapter<CommentRecycler
         if(commentTask.isComplete()) {
             holder.setComment(commentTask.getResult());
             holder.setIndent(commentDepth.get(commentTask.getResult().getId()));
+            holder.setFoldingStateChangeListener((isFolded) -> {
+                if(isFolded)
+                    hideCommentChildren(commentTask.getResult());
+                else
+                    showResolvedCommentChildren(commentTask.getResult());
+            });
             if(number instanceof CommentPlaceholder)
                 holder.setPlaceholderMode(true);
         } else {
@@ -170,6 +183,86 @@ public class CommentRecyclerAdapter extends RecyclerView.Adapter<CommentRecycler
             holder.setIndent(0);
         }
         Timber.d("Current items: %d", targetIds.size());
+    }
+
+    private void hideCommentChildren(Comment comment) {
+
+        if(comment.getKids().size() == 0)
+            return;
+
+        Set<Long> children = new HashSet<>(getCommentChildrenIds(comment));
+
+        int commentPosition = targetIds.indexOf(comment.getId());
+
+        synchronized (targetIds) {
+
+            int start = commentPosition + 1;
+            int end = start;
+
+            for(end = start; end < targetIds.size(); end++)
+                if(!children.contains(targetIds.get(end)))
+                    break;
+
+            // At this moment, the range [start, end) is the children of given comment
+            for(int i = end - 1; i >= start; i--)
+                targetIds.remove(i);
+            notifyItemRangeRemoved(start, end - start);
+        }
+
+    }
+    private void showResolvedCommentChildren(Comment comment) {
+        List<Long> children = getCommentChildrenIds(comment);
+
+        if(children.size() == 0)
+            return;
+
+        synchronized (targetIds) {
+            int targetIndex = targetIds.indexOf(comment.getId());
+            if(targetIndex == -1)
+                throw new IllegalArgumentException("Comment " + comment.getId() + " not exists in RecyclerView");
+
+            targetIds.addAll(targetIndex + 1, children);
+            notifyItemRangeInserted(targetIndex + 1, children.size());
+        }
+    }
+
+    /**
+     * Retrieve a list of children id from given comment object, Also these id should be in DFS order
+     * @param comment The specified comment want to retrieve
+     * @return a list of comment children id of given comment, in DSF order
+     */
+    private List<Long> getCommentChildrenIds(Comment comment) {
+        final Stack<Long> pendingStack = new Stack<>();
+        final List<Long> children = new ArrayList<>();
+
+        for (int i = comment.getKids().size() - 1; i >= 0; i--) {
+            pendingStack.push(comment.getKids().get(i));
+        }
+
+        while(!pendingStack.empty()){
+            Long next = pendingStack.pop();
+            Task<Comment> commentTask = commentStorage.get(next);
+
+            if(commentTask == null || !commentTask.isComplete()) {
+                Timber.w("Comment %d has an unresolved child (id %d)", comment.getId(), next);
+                continue;
+            }
+
+            if(commentTask.getResult() == null) {
+                Timber.w("Comment %d has an null child (id %d)", comment.getId(), next);
+                continue;
+            }
+
+            Comment child = commentTask.getResult();
+
+            for (int i = child.getKids().size() - 1; i >= 0; i--) {
+                pendingStack.push(child.getKids().get(i));
+            }
+
+            children.add(child.getId());
+        }
+
+        return children;
     }
 
     @Override
