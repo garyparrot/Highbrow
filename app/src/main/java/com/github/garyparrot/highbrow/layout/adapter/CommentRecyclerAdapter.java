@@ -225,7 +225,7 @@ public class CommentRecyclerAdapter extends RecyclerView.Adapter<CommentRecycler
 
     }
     private void showResolvedCommentChildren(Comment comment) {
-        List<Long> children = getCommentChildrenIds(comment);
+        List<Long> children = getCommentChildrenIds(comment, true);
 
         if(children.size() == 0)
             return;
@@ -246,6 +246,9 @@ public class CommentRecyclerAdapter extends RecyclerView.Adapter<CommentRecycler
      * @return a list of comment children id of given comment, in DSF order
      */
     private List<Long> getCommentChildrenIds(Comment comment) {
+        return getCommentChildrenIds(comment, false);
+    }
+    private List<Long> getCommentChildrenIds(Comment comment, boolean ignoreCollapsedCommentChildren) {
         final Stack<Long> pendingStack = new Stack<>();
         final List<Long> children = new ArrayList<>();
 
@@ -269,8 +272,12 @@ public class CommentRecyclerAdapter extends RecyclerView.Adapter<CommentRecycler
 
             Comment child = commentTask.getResult();
 
-            for (int i = child.getKids().size() - 1; i >= 0; i--) {
-                pendingStack.push(child.getKids().get(i));
+            boolean resolveChildren = !(ignoreCollapsedCommentChildren && commentFolding.get(child.getId()));
+
+            if(resolveChildren) {
+                for (int i = child.getKids().size() - 1; i >= 0; i--) {
+                    pendingStack.push(child.getKids().get(i));
+                }
             }
 
             children.add(child.getId());
