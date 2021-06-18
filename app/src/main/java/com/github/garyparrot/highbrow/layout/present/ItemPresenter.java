@@ -10,6 +10,8 @@ import com.github.garyparrot.highbrow.model.hacker.news.item.Story;
 import java.net.URI;
 import java.util.Locale;
 
+import timber.log.Timber;
+
 public class ItemPresenter {
 
     public static String friendFoldingHint(boolean isFolded, int childCount) {
@@ -32,9 +34,27 @@ public class ItemPresenter {
         return String.format(Locale.ENGLISH, "%dp",item.getScore());
     }
 
+    public static String compactString(String string) {
+        String newline = System.getProperty("line.separator");
+        return compactString(string, newline);
+    }
+    public static String compactString(String string, String newline) {
+        return string.replace(newline, " ")
+                .replaceAll("\\s+", " ")
+                .trim();
+    }
+
     public static CharSequence renderText(Comment comment, boolean fold) {
         if(comment == null || comment.getText() == null)
             return "";
+        if(fold) {
+            // If comment is in folding state, we will make the whole message into one single line,
+            // merge all duplicated space in single space,
+            // and finally trim all useless space.
+            // Doing so will result in a more compact string which is better for user to have
+            // a first hand insight of what this folded comment is talking about.
+            return Html.fromHtml(compactString(comment.getText(), "<p>"));
+        }
         return Html.fromHtml(comment.getText());
     }
 
