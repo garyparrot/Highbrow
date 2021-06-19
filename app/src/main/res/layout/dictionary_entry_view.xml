@@ -15,24 +15,22 @@
 
     <LinearLayout
         android:id="@+id/layout"
-        android:padding="10dp"
         android:orientation="vertical"
+        android:layout_marginLeft="10dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="10dp"
+        android:paddingLeft="10dp"
+        android:background="@drawable/left_border_shape"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
         <TextView
             android:id="@+id/textViewTitle"
-            android:text="@{ index != null ? `Explainment #`+index : `Explainment`}"
+            android:text="@{ index != null ? `Explanation #`+index : `Explaination`}"
             style="@style/TextAppearance.MaterialComponents.Subtitle2"
-            tools:text="Dictionary Explain #1"
+            tools:text="Explanation #1"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            />
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="2dp"
-            android:background="#ccc"
             />
 
         <TextView
