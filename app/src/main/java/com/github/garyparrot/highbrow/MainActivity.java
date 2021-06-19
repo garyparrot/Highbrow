@@ -28,6 +28,7 @@ import com.github.garyparrot.highbrow.databinding.ActivityMainBinding;
 import com.github.garyparrot.highbrow.layout.adapter.StoryRecyclerAdapter;
 import com.github.garyparrot.highbrow.layout.view.StoryItem;
 import com.github.garyparrot.highbrow.model.hacker.news.item.Story;
+import com.github.garyparrot.highbrow.module.ExecutorServiceModule;
 import com.github.garyparrot.highbrow.module.FirebaseDatabaseModule;
 import com.github.garyparrot.highbrow.room.HighbrowDatabase;
 import com.github.garyparrot.highbrow.room.entity.SavedStory;
@@ -43,6 +44,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
 
 import javax.inject.Inject;
 
@@ -66,6 +68,10 @@ public class MainActivity extends AppCompatActivity{
 
     @Inject
     Gson gson;
+
+    @Inject
+    @ExecutorServiceModule.IoExecutorService
+    ExecutorService ioExecutorService;
 
     private ActivityMainBinding binding;
     private HackerNewsService.StorySeries currentStorySeries;
@@ -264,18 +270,17 @@ public class MainActivity extends AppCompatActivity{
             switchStorySeries(hackerNewsService::jobStoryIDs);
         } else if(menuId == R.id.savedStories) {
             setActionBarTitle("Saved Stories");
-            database.savedStory().findAll()
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe((list) -> {
-                        List<Long> idList = new ArrayList<Long>();
-                        for (SavedStory savedStory : list) {
-                            idList.add(savedStory.getId());
-                        }
-                        switchStorySeries(() -> Tasks.forResult(idList));
-                    }, (e) -> {
-                        e.printStackTrace();
-                    });
+            switchStorySeries(() -> {
+                return Tasks.call(ioExecutorService, () -> database.savedStory().findAll()
+                        .subscribeOn(Schedulers.io())
+                        .map((x) -> {
+                            ArrayList<Long> list = new ArrayList<>();
+                            for (SavedStory savedStory : x) {
+                                list.add(savedStory.getId());
+                            }
+                            return list;
+                        }).blockingGet());
+            });
         }
     }
 
