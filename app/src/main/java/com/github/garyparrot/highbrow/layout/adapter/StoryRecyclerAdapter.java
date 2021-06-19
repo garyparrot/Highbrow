@@ -21,14 +21,17 @@ import com.google.gson.Gson;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.TimeUnit;
 
-import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.schedulers.Schedulers;
+import lombok.AllArgsConstructor;
 import timber.log.Timber;
 
 public class StoryRecyclerAdapter extends RecyclerView.Adapter<StoryRecyclerAdapter.ViewHolder> {
@@ -52,10 +55,12 @@ public class StoryRecyclerAdapter extends RecyclerView.Adapter<StoryRecyclerAdap
         this.context = context;
         this.savedStoryDao = dao;
         hackerNews = service;
-        targetIds = targets;
+        targetIds = new ArrayList<>();
         this.gson = gson;
         this.taskExecutorService = taskExecutorService;
         this.ioExecutorService = ioExecutorService;
+
+        taskExecutorService.submit(new StoryInitializeLogic(20, targets));
     }
 
     public void askToFetchPosition(int i) {
@@ -153,6 +158,52 @@ public class StoryRecyclerAdapter extends RecyclerView.Adapter<StoryRecyclerAdap
     @Override
     public int getItemCount() {
         return targetIds.size();
+    }
+
+    @AllArgsConstructor
+    private class StoryInitializeLogic implements Runnable {
+
+        private final int preloadSize;
+        private final List<Long> targets;
+
+        @Override
+        public void run() {
+            int preloadSize = Math.max(0, Math.min(this.preloadSize, targets.size()));
+
+            if(preloadSize == 0) {
+                Timber.w("No preload will be performed");
+                return;
+            }
+
+            if(this.preloadSize > targets.size()) {
+                Timber.w("Demanded preload size is bigger than the actual dataset, trim to the size of dataset");
+            }
+
+            CountDownLatch latch = new CountDownLatch(preloadSize);
+
+            for(int i = 0; i < preloadSize; i++) {
+                loadStory(i)
+                        .addOnSuccessListener(story -> latch.countDown())
+                        .addOnFailureListener(exception -> {
+                            exception.printStackTrace();
+                            latch.countDown();
+                        });
+            }
+
+            try {
+                latch.await(10, TimeUnit.SECONDS);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+                Timber.w("Pre download timeout");
+            }
+
+            // Schedule to Main Thread
+            Tasks.call(() -> {
+                targetIds.addAll(targets);
+                notifyItemRangeInserted(0, targets.size());
+                return true;
+            });
+        }
     }
 
 }
