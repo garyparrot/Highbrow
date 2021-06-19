@@ -4,6 +4,8 @@ import android.text.Html;
 import android.text.Spanned;
 import android.view.View;
 
+import com.github.garyparrot.highbrow.R;
+import com.github.garyparrot.highbrow.layout.view.CommentItem;
 import com.github.garyparrot.highbrow.model.hacker.news.item.Comment;
 import com.github.garyparrot.highbrow.model.hacker.news.item.Story;
 

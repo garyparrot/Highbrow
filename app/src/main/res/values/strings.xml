@@ -7,4 +7,6 @@
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="story_activity_tab_1">Comment</string>
     <string name="story_activity_tab_2">Article</string>
+    <string name="stringTextToSpeechNotReady">Text To Speech Engine is not ready yet.\nTry again later</string>
+    <string name="stringTextToSpeechEngineMaybeNotInstalled">Failed to initialize Text To Speech Engine.\nIs the voice engine app installed?</string>
 </resources>

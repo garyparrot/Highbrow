@@ -2,6 +2,8 @@ package com.github.garyparrot.highbrow.layout.view;
 
 import android.animation.ValueAnimator;
 import android.content.Context;
+import android.speech.tts.UtteranceProgressListener;
+import android.text.Html;
 import android.view.ActionMode;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -16,9 +18,12 @@ import androidx.annotation.NonNull;
 import com.github.garyparrot.highbrow.R;
 import com.github.garyparrot.highbrow.databinding.CommentCardViewBinding;
 import com.github.garyparrot.highbrow.event.DictionaryLookupEvent;
+import com.github.garyparrot.highbrow.event.GoogleTranslationLaunchingEvent;
 import com.github.garyparrot.highbrow.event.ShareCommentRequest;
+import com.github.garyparrot.highbrow.event.TextToSpeechCancelRequestEvent;
 import com.github.garyparrot.highbrow.event.TextToSpeechRequestEvent;
 import com.github.garyparrot.highbrow.model.hacker.news.item.Comment;
+import com.github.garyparrot.highbrow.module.TextToSpeechModule;
 import com.github.garyparrot.highbrow.service.HackerNewsService;
 
 import org.greenrobot.eventbus.EventBus;
@@ -83,6 +88,68 @@ public class CommentItem extends FrameLayout {
         binding.setSelectionMode(false);
         binding.selectionModeButton.setOnClickListener(this::onSwitchSelectionMode);
         binding.shareCommentButton.setOnClickListener(this::onShareCommentButtonClicked);
+        binding.commentSpeechButton.setOnClickListener(this::onSpeakWholeComment);
+        binding.translateButton.setOnClickListener(this::onTranslateComment);
+    }
+
+    private void onTranslateComment(View view) {
+        eventBus.post(new GoogleTranslationLaunchingEvent(binding.getItem().getText()));
+    }
+
+    private void onSpeakWholeComment(View view) {
+        if(TextToSpeechModule.isTextToSpeechEngineReady() != TextToSpeechModule.EngineState.READY)
+            return;
+
+        if(binding.getTtsState() == null || binding.getTtsState() == TextToSpeechState.NO_TASK) {
+            binding.setTtsState(TextToSpeechState.SYNTHESIS_IN_PROGRESS);
+            sendSpeakWholeCommentRequest();
+        } else {
+            binding.setTtsState(TextToSpeechState.NO_TASK);
+            cancelSpeakRequest();
+        }
+    }
+
+    private void sendSpeakWholeCommentRequest() {
+        String text;
+        if(binding.getItem().isDeleted()) {
+            text = "This comment has been deleted.";
+        } else {
+            text = Html.fromHtml(binding.getItem().getText()).toString();
+        }
+
+        UtteranceProgressListener listener = new UtteranceProgressListener() {
+            @Override
+            public void onStart(String utteranceId) {
+                binding.setTtsState(TextToSpeechState.SPEAKING);
+            }
+
+            @Override
+            public void onDone(String utteranceId) {
+                binding.setTtsState(TextToSpeechState.NO_TASK);
+            }
+
+            @Override
+            public void onError(String utteranceId) {
+                binding.setTtsState(TextToSpeechState.NO_TASK);
+            }
+
+            @Override
+            public void onStop(String utteranceId, boolean interrupted) {
+                binding.setTtsState(TextToSpeechState.NO_TASK);
+            }
+
+            @Override
+            public void onBeginSynthesis(String utteranceId, int sampleRateInHz, int audioFormat, int channelCount) {
+                // Below line is not work as expect, we have to deal with this by ourself.
+                // binding.setTtsState(TextToSpeechState.SYNTHESIS_IN_PROGRESS);
+            }
+        };
+
+        eventBus.post(new TextToSpeechRequestEvent(text, listener));
+
+    }
+    private void cancelSpeakRequest() {
+        eventBus.post(new TextToSpeechCancelRequestEvent());
     }
 
     private void onShareCommentButtonClicked(View view) {
@@ -232,5 +299,11 @@ public class CommentItem extends FrameLayout {
     @FunctionalInterface
     public interface OnCommentFoldingStateChange {
         void onFoldingStateChanged(boolean isFolded);
+    }
+
+    public enum TextToSpeechState {
+        NO_TASK,
+        SYNTHESIS_IN_PROGRESS,
+        SPEAKING
     }
 }

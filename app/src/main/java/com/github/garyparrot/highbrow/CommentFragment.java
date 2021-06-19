@@ -1,6 +1,9 @@
 package com.github.garyparrot.highbrow;
 
+import android.content.ComponentName;
 import android.content.Intent;
+import android.content.pm.ResolveInfo;
+import android.os.Build;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -13,8 +16,10 @@ import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import com.github.garyparrot.highbrow.databinding.FragmentCommentBinding;
+import com.github.garyparrot.highbrow.event.GoogleTranslationLaunchingEvent;
 import com.github.garyparrot.highbrow.event.ShareCommentRequest;
 import com.github.garyparrot.highbrow.layout.adapter.CommentRecyclerAdapter;
 import com.github.garyparrot.highbrow.model.hacker.news.item.Comment;
@@ -100,6 +105,29 @@ public class CommentFragment extends Fragment {
         Intent shareIntent = Intent.createChooser(sendIntent, null);
         startActivity(shareIntent);
 
+    }
+
+    @Subscribe
+    public void subscribeGoogleTranslationRequest(GoogleTranslationLaunchingEvent request) {
+        Intent intent = new Intent();
+
+        String text = request.getText();
+        boolean isNewerVersion = Build.VERSION.SDK_INT >= Build.VERSION_CODES.M;
+
+        intent.setAction(isNewerVersion ? Intent.ACTION_PROCESS_TEXT : Intent.ACTION_SEND);
+        intent.putExtra(isNewerVersion ? Intent.EXTRA_PROCESS_TEXT : Intent.EXTRA_TEXT, text);
+        intent.setType("text/plain");
+
+        for (ResolveInfo resolvedInfo : getContext().getPackageManager().queryIntentActivities(intent, 0)) {
+            intent.setComponent(new ComponentName(
+                    resolvedInfo.activityInfo.packageName,
+                    resolvedInfo.activityInfo.name
+                    ));
+            startActivity(intent);
+            return;
+        }
+
+        Toast.makeText(getContext(), "Failed to launch Google Translate.\nIs it installed?", Toast.LENGTH_SHORT).show();
     }
 
     CommentRecyclerAdapter adapter;

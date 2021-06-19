@@ -11,10 +11,14 @@
         <variable name="selectionMode" type="java.lang.Boolean" />
         <variable name="isLoadMorePlaceholder" type="java.lang.Boolean" />
         <variable name="isCommentBroken" type="java.lang.Boolean" />
+        <variable name="ttsState" type="com.github.garyparrot.highbrow.layout.view.CommentItem.TextToSpeechState" />
         <import type="android.view.View"/>
         <import type="android.widget.TextView"/>
         <import type="com.github.garyparrot.highbrow.layout.present.ItemPresenter"/>
         <import type="android.text.Html"/>
+        <import type="com.github.garyparrot.highbrow.layout.view.CommentItem.TextToSpeechState" />
+        <import type="com.github.garyparrot.highbrow.R" />
+        <import type="androidx.databinding.adapters.Converters"/>
     </data>
 
     <LinearLayout
@@ -106,7 +110,27 @@
                     android:layout_width="match_parent"
                     android:gravity="end"
                     android:layout_height="0dp"
+                    tools:layout_height="@dimen/commentToolBarHeight"
                     android:orientation="horizontal">
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/translateButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        app:cornerRadius="0dp"
+                        app:icon="@drawable/ic_baseline_translate_24"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        style="@style/Widget.App.Button.OutlinedButton.IconOnly"/>
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/commentSpeechButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        app:iconTint="@{ttsState == TextToSpeechState.SPEAKING ? @color/itemOn : (ttsState == TextToSpeechState.SYNTHESIS_IN_PROGRESS ? @color/itemUnsure : @color/itemOff)}"
+                        app:cornerRadius="0dp"
+                        app:icon="@drawable/ic_baseline_record_voice_over_24"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        style="@style/Widget.App.Button.OutlinedButton.IconOnly"/>
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/selectionModeButton"

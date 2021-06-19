@@ -12,17 +12,21 @@ import androidx.viewpager2.adapter.FragmentStateAdapter;
 import android.content.res.Resources;
 import android.os.Bundle;
 import android.speech.tts.TextToSpeech;
+import android.speech.tts.UtteranceProgressListener;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.FrameLayout;
+import android.widget.Toast;
 
 import com.github.garyparrot.highbrow.databinding.ActivityStoryBinding;
 import com.github.garyparrot.highbrow.event.DictionaryLookupEvent;
 import com.github.garyparrot.highbrow.event.DictionaryLookupResultEvent;
+import com.github.garyparrot.highbrow.event.TextToSpeechCancelRequestEvent;
 import com.github.garyparrot.highbrow.event.TextToSpeechRequestEvent;
 import com.github.garyparrot.highbrow.model.dict.UrbanQueryResult;
 import com.github.garyparrot.highbrow.model.hacker.news.item.Story;
 import com.github.garyparrot.highbrow.model.hacker.news.item.general.GeneralStory;
+import com.github.garyparrot.highbrow.module.TextToSpeechModule;
 import com.github.garyparrot.highbrow.service.HackerNewsService;
 import com.github.garyparrot.highbrow.service.UrbanDictionaryService;
 import com.github.garyparrot.highbrow.util.StringUtility;
@@ -65,11 +69,37 @@ public class StoryActivity extends AppCompatActivity {
 
     private Story story;
     private ActivityStoryBinding binding;
+    private UtteranceProgressListener lastListener;
 
     @Subscribe
     public void onTextToSpeechRequest(TextToSpeechRequestEvent event) {
-        ttsEngine.setLanguage(Locale.ENGLISH);
-        ttsEngine.speak(event.getSpeechText(), TextToSpeech.QUEUE_FLUSH, null, event.getSpeechText());
+        switch (TextToSpeechModule.isTextToSpeechEngineReady()) {
+            case READY:
+                ttsEngine.stop();
+                ttsEngine.setLanguage(Locale.ENGLISH);
+                ttsEngine.speak(event.getSpeechText(), TextToSpeech.QUEUE_FLUSH, null, event.getSpeechText());
+                ttsEngine.setOnUtteranceProgressListener(event.getListener());
+                lastListener = event.getListener();
+                break;
+            case NOT_READY:
+                Toast.makeText(this, R.string.stringTextToSpeechNotReady, Toast.LENGTH_SHORT).show();
+                break;
+            case ERROR:
+                Toast.makeText(this, R.string.stringTextToSpeechEngineMaybeNotInstalled, Toast.LENGTH_SHORT).show();
+                break;
+        }
+    }
+    @Subscribe
+    public void onTextToSpeechCancelRequest(TextToSpeechCancelRequestEvent event) {
+        stopTextToSpeechTask();
+    }
+
+    public void stopTextToSpeechTask() {
+        if(ttsEngine.isSpeaking()) {
+            lastListener.onDone("");
+            ttsEngine.setOnUtteranceProgressListener(null);
+            ttsEngine.stop();
+        }
     }
 
     @Subscribe
@@ -131,6 +161,7 @@ public class StoryActivity extends AppCompatActivity {
 
     @Override
     protected void onStop() {
+        stopTextToSpeechTask();
         eventBus.unregister(this);
         super.onStop();
     }
