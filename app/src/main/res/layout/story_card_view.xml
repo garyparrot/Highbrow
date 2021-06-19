@@ -55,11 +55,10 @@
                         app:layout_constraintTop_toTopOf="parent"
                         app:layout_constraintLeft_toLeftOf="parent"
                         app:layout_constraintBottom_toBottomOf="parent"
-                        android:background="#dddddd"
+                        android:background="?attr/cardHeaderBackgroundColor"
                         android:paddingTop="10dp"
                         android:paddingBottom="10dp"
                         android:paddingLeft="5dp"
-                        android:paddingRight="5dp"
                         android:gravity="center"
                         android:orientation="vertical"
                         android:layout_width="50dp"
@@ -83,14 +82,14 @@
                     </LinearLayout>
 
                     <androidx.constraintlayout.widget.ConstraintLayout
+                        android:background="?attr/cardBackgroundColor"
                         app:layout_constraintTop_toTopOf="parent"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintLeft_toRightOf="@id/headerBlock"
                         app:layout_constraintRight_toRightOf="parent"
                         android:paddingTop="5dp"
                         android:paddingBottom="5dp"
-                        android:layout_marginLeft="4dp"
-                        android:layout_marginRight="4dp"
+                        android:paddingLeft="10dp"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content">
 
@@ -141,14 +140,14 @@
                             android:layout_marginEnd="60dp"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            app:tint="@color/light_teal"
+                            app:tint="?highlightColor"
                             android:src="@drawable/ic_outline_comment_24"
                             />
                         <TextView
                             android:id="@+id/commentCounter"
                             android:visibility="@{notReady ? View.GONE : View.VISIBLE}"
                             android:text="@{commentCount.toString()}"
-                            android:textColor="@color/light_teal"
+                            android:textColor="?highlightColor"
                             android:textStyle="bold"
                             tools:text="5566"
                             android:layout_marginStart="3dp"
@@ -164,7 +163,7 @@
                     <View
                         android:layout_width="match_parent"
                         android:layout_height="1dp"
-                        android:background="#cccccc"
+                        android:background="?lineSeparator"
                         app:layout_constraintLeft_toLeftOf="parent"
                         app:layout_constraintRight_toRightOf="parent"
                         app:layout_constraintBottom_toBottomOf="parent"

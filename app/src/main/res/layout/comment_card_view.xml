@@ -42,6 +42,7 @@
             <LinearLayout
                 android:orientation="vertical"
                 android:layout_gravity=""
+                android:background="?android:colorBackground"
                 android:visibility="@{item == null ? View.GONE : View.VISIBLE}"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -74,7 +75,7 @@
                         app:layout_constraintTop_toTopOf="@id/textViewAuthor"
                         app:layout_constraintBottom_toBottomOf="@id/textViewAuthor"
                         android:layout_marginStart="3dp"
-                        android:textColor="#555555"
+                        android:textColor="?attr/decorationTextColor"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"/>
 
@@ -127,7 +128,7 @@
                         android:id="@+id/commentSpeechButton"
                         android:layout_width="wrap_content"
                         android:layout_height="match_parent"
-                        app:iconTint="@{ttsState == TextToSpeechState.SPEAKING ? @color/itemOn : (ttsState == TextToSpeechState.SYNTHESIS_IN_PROGRESS ? @color/itemUnsure : @color/itemOff)}"
+                        app:iconTint="@{ItemPresenter.fromTextToSpeechStateToAttrId(ttsState)}"
                         app:cornerRadius="0dp"
                         app:icon="@drawable/ic_baseline_record_voice_over_24"
                         android:background="?attr/selectableItemBackgroundBorderless"
@@ -139,7 +140,7 @@
                         android:layout_height="match_parent"
                         app:cornerRadius="0dp"
                         app:icon="@drawable/ic_baseline_text_fields_24"
-                        app:iconTint="@{selectionMode ? @color/itemOn : @color/itemOff}"
+                        app:iconTint="@{selectionMode ? R.attr.itemOn : R.attr.itemOff}"
                         android:background="?attr/selectableItemBackgroundBorderless"
                         style="@style/Widget.App.Button.OutlinedButton.IconOnly"/>
 
@@ -164,7 +165,8 @@
             android:text="Load More ..."
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:backgroundTint="@color/white"
+            android:backgroundTint="?android:colorBackground"
+            android:textColor="?colorPrimary"
             android:insetTop="0dp"
             android:insetBottom="0dp"
             style="@style/Widget.MaterialComponents.Button.TextButton"

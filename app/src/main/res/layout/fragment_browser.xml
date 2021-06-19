@@ -23,6 +23,7 @@
                 android:id="@+id/progressBar"
                 style="@style/Widget.AppCompat.ProgressBar.Horizontal"
                 android:progress="0"
+                android:background="?android:colorBackground"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"/>
 

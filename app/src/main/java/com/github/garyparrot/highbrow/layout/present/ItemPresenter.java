@@ -1,14 +1,25 @@
 package com.github.garyparrot.highbrow.layout.present;
 
+import android.content.Context;
+import android.content.res.ColorStateList;
+import android.content.res.TypedArray;
 import android.net.Uri;
+import android.os.Build;
 import android.text.Html;
 import android.text.Spanned;
+import android.util.TypedValue;
 import android.view.View;
+import android.widget.Button;
+
+import androidx.annotation.AttrRes;
+import androidx.annotation.StyleRes;
+import androidx.databinding.BindingAdapter;
 
 import com.github.garyparrot.highbrow.R;
 import com.github.garyparrot.highbrow.layout.view.CommentItem;
 import com.github.garyparrot.highbrow.model.hacker.news.item.Comment;
 import com.github.garyparrot.highbrow.model.hacker.news.item.Story;
+import com.google.android.material.button.MaterialButton;
 
 import java.net.URI;
 import java.util.Locale;
@@ -16,6 +27,33 @@ import java.util.Locale;
 import timber.log.Timber;
 
 public class ItemPresenter {
+
+    public static int fromTextToSpeechStateToAttrId(CommentItem.TextToSpeechState state) {
+        if(state == null)
+            return R.attr.itemOff;
+        switch (state) {
+            case SPEAKING: return R.attr.itemOn;
+            case SYNTHESIS_IN_PROGRESS: return R.attr.itemUnsure;
+            case NO_TASK:
+            default:
+                return R.attr.itemOff;
+        }
+    }
+
+    @BindingAdapter("app:iconTint")
+    public static void iconTint(MaterialButton view, int resId){
+        TypedValue value = new TypedValue();
+        view.getContext().getTheme().resolveAttribute(resId, value, true);
+        view.setIconTint(ColorStateList.valueOf(value.data));
+    }
+
+    public static int resolveColor(Context context, int resourceId) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            return context.getResources().getColor(resourceId, context.getTheme());
+        } else {
+            return context.getResources().getColor(resourceId);
+        }
+    }
 
     public static String friendFoldingHint(boolean isFolded, int childCount) {
         if(isFolded) {

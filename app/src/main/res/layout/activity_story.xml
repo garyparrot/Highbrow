@@ -18,88 +18,88 @@
         tools:context=".StoryActivity">
 
         <com.google.android.material.appbar.AppBarLayout
-            android:fitsSystemWindows="true"
-            app:liftOnScroll="true"
-            app:layout_behavior=".layout.util.CustomAppBarLayoutBehavior"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:fitsSystemWindows="true"
+            app:layout_behavior=".layout.util.CustomAppBarLayoutBehavior"
+            app:liftOnScroll="true">
 
             <com.google.android.material.appbar.MaterialToolbar
-                android:fitsSystemWindows="true"
                 android:id="@+id/topAppBar"
-                app:navigationIcon="@drawable/ic_baseline_arrow_back_24"
-                android:elevation="0dp"
-                tools:title="Story Title"
-                app:layout_scrollFlags="scroll"
-                app:menu="@menu/story_toolbar_menu"
-                style="@style/Widget.MaterialComponents.Toolbar.Primary"
+                app:titleTextColor="?attr/colorOnPrimary"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                >
+                android:elevation="0dp"
+                android:fitsSystemWindows="true"
+                app:layout_scrollFlags="scroll"
+                app:menu="@menu/story_toolbar_menu"
+                app:navigationIcon="@drawable/ic_baseline_arrow_back_24"
+                tools:title="Story Title">
 
             </com.google.android.material.appbar.MaterialToolbar>
 
             <androidx.constraintlayout.widget.ConstraintLayout
-                app:layout_scrollFlags="scroll"
-                android:paddingTop="10dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
                 android:paddingLeft="20dp"
+                android:paddingTop="10dp"
                 android:paddingRight="20dp"
                 android:paddingBottom="20dp"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+                app:layout_scrollFlags="scroll">
 
                 <TextView
                     android:id="@+id/storyTitle"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:layout_constraintLeft_toLeftOf="parent"
-                    android:text="@{story.title}"
-                    tools:text="Story Title"
-                    android:textColor="@color/white"
                     style="@style/TextAppearance.MdcTypographyStyles.Headline6"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"/>
+                    android:layout_height="wrap_content"
+                    android:text="@{story.title}"
+                    android:textColor="@color/white"
+                    app:layout_constraintLeft_toLeftOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    tools:text="Story Title" />
 
                 <TextView
                     android:id="@+id/domainName"
-                    android:layout_marginTop="5dp"
-                    app:layout_constraintTop_toBottomOf="@id/storyTitle"
-                    app:layout_constraintLeft_toLeftOf="parent"
-                    android:text="@{ItemPresenter.getDomainName(story.url)}"
-                    tools:text="news.ycombinator.com"
-                    android:textColor="@color/white"
                     style="@style/TextAppearance.MdcTypographyStyles.decoration"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"/>
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="5dp"
+                    android:text="@{ItemPresenter.getDomainName(story.url)}"
+                    android:textColor="@color/white"
+                    app:layout_constraintLeft_toLeftOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/storyTitle"
+                    tools:text="news.ycombinator.com" />
 
                 <TextView
                     android:id="@+id/information"
                     style="@style/TextAppearance.MdcTypographyStyles.decoration"
-                    app:layout_constraintTop_toBottomOf="@id/domainName"
-                    app:layout_constraintLeft_toLeftOf="parent"
-                    android:textColor="@color/white"
-                    android:text="@{ItemPresenter.getInformation(story)}"
-                    tools:text="0ms - garyparrot"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    />
+                    android:text="@{ItemPresenter.getInformation(story)}"
+                    android:textColor="@color/white"
+                    app:layout_constraintLeft_toLeftOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/domainName"
+                    tools:text="0ms - garyparrot" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
             <com.google.android.material.tabs.TabLayout
                 android:id="@+id/tabLayout"
                 android:layout_width="match_parent"
-                app:layout_scrollFlags="scroll|enterAlways"
-                android:layout_height="wrap_content">
+                android:layout_height="wrap_content"
+                app:tabTextColor="@color/tab_text_color"
+                app:tabIndicatorColor="?attr/tabIndicatorColor"
+                app:layout_scrollFlags="scroll|enterAlways">
 
                 <com.google.android.material.tabs.TabItem
-                    android:text="Comment"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"/>
+                    android:layout_height="wrap_content"
+                    android:text="Comment" />
 
                 <com.google.android.material.tabs.TabItem
-                    android:text="Article"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"/>
+                    android:layout_height="wrap_content"
+                    android:text="Article" />
 
             </com.google.android.material.tabs.TabLayout>
 

@@ -14,6 +14,21 @@
         <!-- Customize your theme here. -->
         <item name="android:windowTranslucentStatus">true</item>
         <item name="autoCompleteTextViewStyle">@style/SearchAutoCompleteTextView</item>
+        <item name="highlightColor">@color/notice_300</item>
+        <item name="lineSeparator">#dddddd</item>
+        <item name="surfaceBox">#dddddd</item>
+
+        <item name="tabIndicatorColor">?colorPrimary</item>
+        <item name="tabTextColor">@color/purple_500</item>
+        <item name="tabTextColorNotHighlight">@color/purple_500</item>
+        <item name="decorationTextColor">#555555</item>
+
+        <item name="itemOn">@color/purple_500</item>
+        <item name="itemUnsure">@color/purple_200</item>
+        <item name="itemOff">#bbbbbb</item>
+
+        <item name="cardHeaderBackgroundColor">#dddddd</item>
+        <item name="cardBackgroundColor">@color/white</item>
     </style>
 
     <style name="SearchAutoCompleteTextView" parent="Widget.AppCompat.Light.AutoCompleteTextView">

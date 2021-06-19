@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <group
         android:id="@+id/stories"
@@ -9,6 +10,7 @@
 
         <item
             android:id="@+id/topStories"
+            tools:checked="true"
             android:icon="@drawable/ic_baseline_trending_up_24"
             android:title="Top Stories"/>
         <item

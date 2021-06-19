@@ -10,6 +10,7 @@
     <androidx.drawerlayout.widget.DrawerLayout
         android:id="@+id/drawerLayout"
         android:layout_width="match_parent"
+        tools:openDrawer="start"
         android:layout_height="match_parent"
         >
 
@@ -61,6 +62,8 @@
             app:menu="@menu/navigation_drawer"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
+            app:itemTextColor="@color/focused_drawer_item_dark"
+            app:itemIconTint="@color/focused_drawer_item_dark"
             />
 
     </androidx.drawerlayout.widget.DrawerLayout>

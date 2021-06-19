@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <attr name="lineSeparator" format="color"/>
+    <attr name="highlightColor" format="color"/>
+    <attr name="tabTextColorNotHighlight" format="color"/>
+    <attr name="decorationTextColor" format="color"/>
+    <attr name="surfaceBox" format="color"/>
+
+    <attr name="itemOn" format="color"/>
+    <attr name="itemOff" format="color"/>
+    <attr name="itemUnsure" format="color"/>
+
+    <attr name="cardHeaderBackgroundColor" format="color"/>
+    <attr name="cardBackgroundColor" format="color"/>
+</resources>

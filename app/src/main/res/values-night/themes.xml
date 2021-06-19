@@ -1,19 +1,50 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
-    <style name="Theme.Highbrow" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
-        <!-- Primary brand color. -->
-        <item name="colorPrimary">@color/purple_200</item>
-        <item name="colorPrimaryVariant">@color/purple_700</item>
-        <item name="colorOnPrimary">@color/black</item>
-        <!-- Secondary brand color. -->
-        <item name="colorSecondary">@color/teal_200</item>
-        <item name="colorSecondaryVariant">@color/teal_200</item>
-        <item name="colorOnSecondary">@color/black</item>
-        <!-- Status bar color. -->
-        <item name="android:statusBarColor" tools:targetApi="l">?attr/colorPrimaryVariant</item>
-        <!-- Customize your theme here. -->
+    <style name="Theme.Highbrow" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/dark_500</item>
+        <item name="colorPrimaryVariant">@color/dark_700</item>
+        <item name="colorOnPrimary">@color/white</item>
+
+
+        <item name="tabTextColor">@color/orange_500</item>
+        <item name="tabTextColorNotHighlight">@color/white</item>
+        <item name="tabIndicatorColor">@color/orange_500</item>
+
+        <item name="colorSecondary">@color/orange_500</item>
+        <item name="colorSecondaryVariant">@color/orange_700</item>
+        <item name="colorOnSecondary">@color/white</item>
+
+        <item name="colorError">@color/final_warning_700</item>
+        <item name="colorOnError">@color/white</item>
+
+        <item name="highlightColor">@color/notice_300</item>
+
+        <item name="colorSurface">@color/dark_200</item>
+        <item name="colorOnSurface">@color/white</item>
+
+        <item name="android:colorBackground">@color/dark_500</item>
+        <item name="colorOnBackground">@color/white</item>
+
+        <item name="android:textColorHighlight">@color/orange_500</item>
+        <item name="android:textColorPrimary">@color/white</item>
+        <item name="android:textColorSecondary">@color/white</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="itemIconTint">@color/focused_drawer_item_dark</item>
+        <item name="itemTextColor">@color/focused_drawer_item_dark</item>
+
         <item name="android:windowTranslucentStatus">true</item>
-        <item name="searchViewStyle">@style/Theme.Highbrow</item>
         <item name="autoCompleteTextViewStyle">@style/SearchAutoCompleteTextView</item>
+
+        <item name="lineSeparator">#333333</item>
+        <item name="surfaceBox">@color/dark_500</item>
+        <item name="decorationTextColor">#cccccc</item>
+
+        <item name="itemOn">@color/orange_500</item>
+        <item name="itemUnsure">@color/orange_200</item>
+        <item name="itemOff">#bbbbbb</item>
+
+        <item name="cardHeaderBackgroundColor">@color/dark_200</item>
+        <item name="cardBackgroundColor">@color/dark_500</item>
     </style>
+
 </resources>
