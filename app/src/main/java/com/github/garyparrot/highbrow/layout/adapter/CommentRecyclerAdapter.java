@@ -16,7 +16,7 @@ import com.github.garyparrot.highbrow.model.hacker.news.item.general.GeneralComm
 import com.github.garyparrot.highbrow.model.hacker.news.item.general.NullComment;
 import com.github.garyparrot.highbrow.model.hacker.news.item.modifier.HaveKids;
 import com.github.garyparrot.highbrow.service.HackerNewsService;
-import com.github.garyparrot.highbrow.util.MockItem;
+import com.github.garyparrot.highbrow.util.HackerNewsItemUtility;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
 
@@ -142,7 +142,7 @@ public class CommentRecyclerAdapter extends RecyclerView.Adapter<CommentRecycler
         Timber.d("Binding for item at position %d", position);
         // Setup number and fake story, real story will replace the fake content after retrieve the real data
         holder.setNumber(position);
-        holder.setComment(MockItem.getEmptyComment());
+        holder.setComment(HackerNewsItemUtility.getEmptyComment());
 
         // Allocate a request id for this binding action
         // If user scroll too fast, the target story of this request might be outdated

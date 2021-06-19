@@ -9,10 +9,14 @@ import androidx.fragment.app.FragmentActivity;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
 
+import android.content.Intent;
 import android.content.res.Resources;
+import android.net.Uri;
 import android.os.Bundle;
 import android.speech.tts.TextToSpeech;
 import android.speech.tts.UtteranceProgressListener;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.FrameLayout;
@@ -29,6 +33,7 @@ import com.github.garyparrot.highbrow.model.hacker.news.item.general.GeneralStor
 import com.github.garyparrot.highbrow.module.TextToSpeechModule;
 import com.github.garyparrot.highbrow.service.HackerNewsService;
 import com.github.garyparrot.highbrow.service.UrbanDictionaryService;
+import com.github.garyparrot.highbrow.util.HackerNewsItemUtility;
 import com.github.garyparrot.highbrow.util.StringUtility;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.tabs.TabLayoutMediator;
@@ -142,6 +147,7 @@ public class StoryActivity extends AppCompatActivity {
         binding.viewPager.setAdapter(new ScreenSlidePagerAdapter(this));
         setBottomSheetState(BottomSheetBehavior.STATE_HIDDEN);
         binding.topAppBar.setNavigationOnClickListener((view) -> this.finish());
+        binding.topAppBar.setOnMenuItemClickListener(this::onOptionsItemSelected);
 
         new TabLayoutMediator(binding.tabLayout, binding.viewPager, (tab, position) -> {
             if (position == 0)
@@ -187,5 +193,21 @@ public class StoryActivity extends AppCompatActivity {
         public int getItemCount() {
             return 2;
         }
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        if(item.getItemId() == R.id.openExternalWebBrowser) {
+            openArticleInExternalBrowser();
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
+    public void openArticleInExternalBrowser() {
+        Intent i = new Intent(Intent.ACTION_VIEW);
+        i.setData(Uri.parse(HackerNewsItemUtility.resolveRealUrl(story)));
+        startActivity(i);
     }
 }

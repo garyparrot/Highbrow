@@ -1,14 +1,16 @@
 package com.github.garyparrot.highbrow.util;
 
 import com.github.garyparrot.highbrow.model.hacker.news.item.Comment;
+import com.github.garyparrot.highbrow.model.hacker.news.item.Item;
 import com.github.garyparrot.highbrow.model.hacker.news.item.ItemType;
 import com.github.garyparrot.highbrow.model.hacker.news.item.Story;
 import com.github.garyparrot.highbrow.model.hacker.news.item.general.GeneralComment;
 import com.github.garyparrot.highbrow.model.hacker.news.item.general.GeneralStory;
+import com.github.garyparrot.highbrow.model.hacker.news.item.modifier.HasUrl;
 
 import java.util.Collections;
 
-public class MockItem {
+public class HackerNewsItemUtility {
 
     public static Comment getEmptyComment() {
         return GeneralComment.builder()
@@ -36,5 +38,10 @@ public class MockItem {
                 .build();
     }
 
+    public static <T extends HasUrl & Item> String resolveRealUrl(T item) {
+        if(item.getUrl() == null || item.getUrl().equals(""))
+            return "https://news.ycombinator.com/item?id=" + item.getId();
+        return item.getUrl();
+    }
 
 }

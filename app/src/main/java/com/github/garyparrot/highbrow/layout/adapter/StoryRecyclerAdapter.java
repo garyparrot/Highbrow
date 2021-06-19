@@ -12,7 +12,7 @@ import com.github.garyparrot.highbrow.layout.view.StoryItem;
 import com.github.garyparrot.highbrow.model.hacker.news.item.Story;
 import com.github.garyparrot.highbrow.room.dao.SavedStoryDao;
 import com.github.garyparrot.highbrow.service.HackerNewsService;
-import com.github.garyparrot.highbrow.util.MockItem;
+import com.github.garyparrot.highbrow.util.HackerNewsItemUtility;
 import com.github.garyparrot.highbrow.util.SaveResult;
 import com.google.android.gms.tasks.Task;
 import com.google.gson.Gson;
@@ -24,7 +24,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import dagger.hilt.android.AndroidEntryPoint;
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 import timber.log.Timber;
@@ -100,7 +99,7 @@ public class StoryRecyclerAdapter extends RecyclerView.Adapter<StoryRecyclerAdap
     public void onBindViewHolder(@NonNull @NotNull final StoryRecyclerAdapter.ViewHolder holder, int position) {
         // Setup number and fake story, real story will replace the fake content after retrieve the real data
         holder.setNumber(position);
-        holder.setStory(MockItem.getEmptyStory());
+        holder.setStory(HackerNewsItemUtility.getEmptyStory());
 
         // Allocate a request id for this binding action
         // If user scroll too fast, the target story of this request might be outdated
