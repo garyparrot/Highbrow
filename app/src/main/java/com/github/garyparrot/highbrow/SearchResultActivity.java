@@ -11,6 +11,7 @@ import android.os.Bundle;
 import com.github.garyparrot.highbrow.databinding.ActivitySearchResultBinding;
 import com.github.garyparrot.highbrow.layout.adapter.StoryRecyclerAdapter;
 import com.github.garyparrot.highbrow.model.hacker.news.algolia.StorySearchEntry;
+import com.github.garyparrot.highbrow.module.ExecutorServiceModule;
 import com.github.garyparrot.highbrow.room.HighbrowDatabase;
 import com.github.garyparrot.highbrow.service.HackerNewsSearchService;
 import com.github.garyparrot.highbrow.service.HackerNewsService;
@@ -18,6 +19,7 @@ import com.google.gson.Gson;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
 
 import javax.inject.Inject;
 
@@ -40,6 +42,15 @@ public class SearchResultActivity extends AppCompatActivity {
 
     @Inject
     Gson gson;
+
+    @Inject
+    @ExecutorServiceModule.IoExecutorService
+    ExecutorService ioExecutorService;
+
+
+    @Inject
+    @ExecutorServiceModule.TaskExecutorService
+    ExecutorService taskExecutorService;
 
     public static final String BUNDLE_QUERY_TEXT = "QUERY_TEXT";
 
@@ -70,6 +81,13 @@ public class SearchResultActivity extends AppCompatActivity {
     }
 
     private void setAdapter(List<Long> targetId) {
-        binding.recycleView.setAdapter(new StoryRecyclerAdapter(this, hackerNewsService, database.savedStory(), targetId,gson));
+        binding.recycleView.setAdapter(new StoryRecyclerAdapter(
+                this,
+                hackerNewsService,
+                database.savedStory(),
+                targetId,
+                gson,
+                ioExecutorService,
+                taskExecutorService));
     }
 }

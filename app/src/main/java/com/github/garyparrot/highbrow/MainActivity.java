@@ -73,9 +73,14 @@ public class MainActivity extends AppCompatActivity{
     @ExecutorServiceModule.IoExecutorService
     ExecutorService ioExecutorService;
 
+    @Inject
+    @ExecutorServiceModule.TaskExecutorService
+    ExecutorService taskExecutorService;
+
     private ActivityMainBinding binding;
     private HackerNewsService.StorySeries currentStorySeries;
     private ItemTouchHelper itemTouchHelper;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -85,6 +90,7 @@ public class MainActivity extends AppCompatActivity{
         LogUtility.setupTimber();
 
         binding.recycleView.setLayoutManager(new LinearLayoutManager(this));
+        binding.recycleView.addOnScrollListener(createScrollingListener());
         binding.swipeRefreshLayout.setOnRefreshListener(this::onRefresh);
         binding.topAppBar.setNavigationOnClickListener((view) -> binding.drawerLayout.openDrawer(binding.navigationView));
         binding.navigationView.setNavigationItemSelectedListener(this::onNavigationViewItemSelected);
@@ -93,6 +99,21 @@ public class MainActivity extends AppCompatActivity{
 
         setupSearch();
         setupItemTouchHelper();
+    }
+
+    private RecyclerView.OnScrollListener createScrollingListener() {
+        return new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrolled(@NonNull @NotNull RecyclerView recyclerView, int dx, int dy) {
+                StoryRecyclerAdapter adapter = (StoryRecyclerAdapter) binding.recycleView.getAdapter();
+                LinearLayoutManager layoutManager = (LinearLayoutManager) binding.recycleView.getLayoutManager();
+                int lastVisibleItemPosition = layoutManager.findLastVisibleItemPosition();
+                int preloadingPosition = Math.min(adapter.getItemCount(), lastVisibleItemPosition + 40);
+
+                for (int i = lastVisibleItemPosition; i < preloadingPosition; i++)
+                    adapter.askToFetchPosition(i);
+            }
+        };
     }
 
     private void setupSearch() {
@@ -296,7 +317,7 @@ public class MainActivity extends AppCompatActivity{
         return seriesMethod.call()
                 .addOnCompleteListener(task -> {
                     List<Long> series = task.getResult();
-                    StoryRecyclerAdapter newAdapter = new StoryRecyclerAdapter(this, hackerNewsService, database.savedStory(), series, gson);
+                    StoryRecyclerAdapter newAdapter = new StoryRecyclerAdapter(this, hackerNewsService, database.savedStory(), series, gson, ioExecutorService, taskExecutorService);
                     binding.recycleView.setAdapter(newAdapter);
                 });
     }
