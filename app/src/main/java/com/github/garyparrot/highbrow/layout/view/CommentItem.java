@@ -93,7 +93,9 @@ public class CommentItem extends FrameLayout {
     }
 
     private void onTranslateComment(View view) {
-        eventBus.post(new GoogleTranslationLaunchingEvent(binding.getItem().getText()));
+        String rawString = binding.getItem().getText();
+        String renderedString = Html.fromHtml(rawString).toString();
+        eventBus.post(new GoogleTranslationLaunchingEvent(renderedString));
     }
 
     private void onSpeakWholeComment(View view) {
