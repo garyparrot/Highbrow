@@ -1,5 +1,6 @@
 package com.github.garyparrot.highbrow.layout.present;
 
+import android.net.Uri;
 import android.text.Html;
 import android.text.Spanned;
 import android.view.View;
@@ -75,6 +76,8 @@ public class ItemPresenter {
     public static String getDomainName(String url) {
         if(url == null)
             return "news.ycombinator.com";
+        if(url.equals(""))
+            return "";
         URI uri = URI.create(url);
         return uri.getHost();
     }

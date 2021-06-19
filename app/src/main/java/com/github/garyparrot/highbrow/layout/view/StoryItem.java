@@ -43,4 +43,7 @@ public class StoryItem extends FrameLayout {
     public void setOnClickListener(@Nullable OnClickListener l) {
         binding.card.setOnClickListener(l);
     }
+    public void setReady(boolean isReady) {
+        this.binding.setNotReady(!isReady);
+    }
 }

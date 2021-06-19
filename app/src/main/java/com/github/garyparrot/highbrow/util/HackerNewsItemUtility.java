@@ -34,7 +34,7 @@ public class HackerNewsItemUtility {
                 .time(0)
                 .title("")
                 .itemType(ItemType.Story)
-                .url(null)
+                .url("")
                 .build();
     }
 

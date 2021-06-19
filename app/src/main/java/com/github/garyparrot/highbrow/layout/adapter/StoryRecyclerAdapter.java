@@ -94,6 +94,7 @@ public class StoryRecyclerAdapter extends RecyclerView.Adapter<StoryRecyclerAdap
         void setStory(Story story) {
             item.setStory(story);
         }
+        void setReady(boolean isReady) { item.setReady(isReady); }
     }
 
     @NonNull
@@ -117,12 +118,14 @@ public class StoryRecyclerAdapter extends RecyclerView.Adapter<StoryRecyclerAdap
 
         holder.setNumber(position);
         holder.setSaved(MapUtility.getOrDefault(storyIsSaved, storyId, false));
-        if(storyTask.isSuccessful() && storyTask.getResult() != null)
+        if(storyTask.isSuccessful() && storyTask.getResult() != null) {
             holder.setStory(storyTask.getResult());
-        else {
+            holder.setReady(true);
+        } else {
             // If story not resolved yet, we add a listener to wait for the result
             // Once we got the result, calling ``Adapter::notifyItemChanged`` to ask RecyclerView to update that item
             holder.setStory(HackerNewsItemUtility.getEmptyStory());
+            holder.setReady(false);
             storyTask.continueWithTask(ioExecutorService, (x) -> {
                         return Tasks.call(() -> savedStoryDao.isSavedStoryExists(targetIds.get(position))
                                 .subscribeOn(Schedulers.io())

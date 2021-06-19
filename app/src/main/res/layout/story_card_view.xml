@@ -7,7 +7,9 @@
         <variable name="item" type="com.github.garyparrot.highbrow.model.hacker.news.item.Story" />
         <variable name="number" type="java.lang.Integer" />
         <variable name="commentCount" type="java.lang.Long" />
+        <variable name="notReady" type="java.lang.Boolean" />
         <import type="com.github.garyparrot.highbrow.layout.present.ItemPresenter"/>
+        <import type="android.view.View"/>
     </data>
 
     <FrameLayout
@@ -66,7 +68,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="@{ItemPresenter.toNumberFormat(number)}"
+                            android:text="@{ItemPresenter.toNumberFormat(number+1)}"
                             tools:text="1"/>
 
                         <TextView
@@ -74,7 +76,7 @@
                             android:textAllCaps="false"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="@{ItemPresenter.toScoreString(item)}"
+                            android:text="@{notReady ? `` : ItemPresenter.toScoreString(item)}"
                             tools:text="300p"
                             />
 
@@ -100,7 +102,7 @@
                             app:layout_constraintRight_toRightOf="parent"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:text="@{item.getTitle()}"
+                            android:text="@{notReady ? `` : item.getTitle()}"
                             tools:text="Advice for Junior Developers" />
 
                         <TextView
@@ -111,7 +113,7 @@
                             android:layout_marginTop="2dp"
                             android:layout_marginBottom="2dp"
                             style="@style/TextAppearance.MdcTypographyStyles.decoration"
-                            android:text="@{ItemPresenter.getDomainName(item.getUrl())}"
+                            android:text="@{notReady ? `` : ItemPresenter.getDomainName(item.getUrl())}"
                             tools:text="news.ycombinator.com"
                             android:singleLine="true"
                             android:layout_width="0dp"
@@ -126,7 +128,7 @@
                             app:layout_constraintBottom_toBottomOf="parent"
                             android:layout_marginTop="2dp"
                             android:layout_marginBottom="2dp"
-                            android:text="@{ItemPresenter.getInformation(item)}"
+                            android:text="@{notReady ? `` : ItemPresenter.getInformation(item)}"
                             tools:text="3h - by garyparrot"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"/>
@@ -135,6 +137,7 @@
                             android:id="@+id/imageViewCommentCount"
                             app:layout_constraintBottom_toBottomOf="parent"
                             app:layout_constraintRight_toRightOf="parent"
+                            android:visibility="@{notReady ? View.GONE : View.VISIBLE}"
                             android:layout_marginEnd="60dp"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
@@ -143,6 +146,7 @@
                             />
                         <TextView
                             android:id="@+id/commentCounter"
+                            android:visibility="@{notReady ? View.GONE : View.VISIBLE}"
                             android:text="@{commentCount.toString()}"
                             android:textColor="@color/light_teal"
                             android:textStyle="bold"

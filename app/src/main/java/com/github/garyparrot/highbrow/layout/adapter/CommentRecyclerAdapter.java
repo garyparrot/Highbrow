@@ -189,7 +189,7 @@ public class CommentRecyclerAdapter extends RecyclerView.Adapter<CommentRecycler
                     .id(0)
                     .kids(Collections.emptyList())
                     .parentId(0)
-                    .text(String.valueOf(commentId))
+                    .text("...")
                     .time(0)
                     .itemType(ItemType.Comment)
                     .build();
