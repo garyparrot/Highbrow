@@ -82,7 +82,7 @@ public class CommentRecyclerAdapter extends RecyclerView.Adapter<CommentRecycler
         hackerNews = service;
         targetIds = Collections.synchronizedList(new ArrayList<>());
 
-        commentPreDownloadExecutorService.submit(new CommentWarmUpLogic(story, 3, 30));
+        commentPreDownloadExecutorService.submit(new CommentWarmUpLogic(story, 5, 10));
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {

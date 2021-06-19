@@ -60,7 +60,7 @@ public class StoryRecyclerAdapter extends RecyclerView.Adapter<StoryRecyclerAdap
         this.taskExecutorService = taskExecutorService;
         this.ioExecutorService = ioExecutorService;
 
-        taskExecutorService.submit(new StoryInitializeLogic(20, targets));
+        taskExecutorService.submit(new StoryInitializeLogic(10, targets));
     }
 
     public void askToFetchPosition(int i) {

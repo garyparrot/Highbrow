@@ -108,7 +108,7 @@ public class MainActivity extends AppCompatActivity{
                 StoryRecyclerAdapter adapter = (StoryRecyclerAdapter) binding.recycleView.getAdapter();
                 LinearLayoutManager layoutManager = (LinearLayoutManager) binding.recycleView.getLayoutManager();
                 int lastVisibleItemPosition = layoutManager.findLastVisibleItemPosition();
-                int preloadingPosition = Math.min(adapter.getItemCount(), lastVisibleItemPosition + 40);
+                int preloadingPosition = Math.min(adapter.getItemCount(), lastVisibleItemPosition + 10);
 
                 for (int i = lastVisibleItemPosition; i < preloadingPosition; i++)
                     adapter.askToFetchPosition(i);
