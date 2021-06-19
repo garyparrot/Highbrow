@@ -24,20 +24,11 @@ import retrofit2.converter.gson.GsonConverterFactory;
 @InstallIn(SingletonComponent.class)
 public class HackerNewsModule {
 
-    @Provides
-    ExecutorService ioExecutorService() {
-        // Since we are doing IO intensive task on this pool, it is ok to use more thread.
-        // I just assume the Blocking factor to be 0.1
-        // It is just a magic number, I didn't do any math behind it.
-        return new ThreadPoolExecutor(0,
-                Runtime.getRuntime().availableProcessors() * 10,
-                5,
-                TimeUnit.SECONDS,
-                new LinkedBlockingDeque<>());
-    }
 
     @Provides
-    HackerNewsService firebaseHackerNewsService(@FirebaseDatabaseModule.HackerNews DatabaseReference firebase, ExecutorService ioExecutorService) {
+    HackerNewsService firebaseHackerNewsService(
+            @FirebaseDatabaseModule.HackerNews DatabaseReference firebase,
+            @ExecutorServiceModule.IoExecutorService ExecutorService ioExecutorService) {
         return new FirebaseHackerNewsService(ioExecutorService, firebase);
     }
 

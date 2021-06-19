@@ -69,7 +69,7 @@ public class CommentRecyclerAdapter extends RecyclerView.Adapter<CommentRecycler
         return nextRequestId++;
     }
 
-    public CommentRecyclerAdapter(Context context, HackerNewsService service, ExecutorService downloadExecutorService, Story story) {
+    public CommentRecyclerAdapter(Story story, Context context, HackerNewsService service, ExecutorService commentPreDownloadExecutorService, ExecutorService downloadExecutorService) {
         this.context = context;
         this.commentStorage = Collections.synchronizedMap(new HashMap<>());
         this.commentDepth = Collections.synchronizedMap(new HashMap<>());
@@ -77,7 +77,7 @@ public class CommentRecyclerAdapter extends RecyclerView.Adapter<CommentRecycler
         this.commentBloodline = Collections.synchronizedMap(new HashMap<>());
         this.story = story;
         this.downloadExecutorService = downloadExecutorService;
-        this.commentPreDownloadExecutorService = Executors.newFixedThreadPool(5);
+        this.commentPreDownloadExecutorService = commentPreDownloadExecutorService;
 
         hackerNews = service;
         targetIds = Collections.synchronizedList(new ArrayList<>());

@@ -27,6 +27,7 @@ import com.github.garyparrot.highbrow.model.hacker.news.item.Story;
 import com.github.garyparrot.highbrow.model.hacker.news.item.general.GeneralStory;
 import com.github.garyparrot.highbrow.model.hacker.news.item.map.MapStory;
 import com.github.garyparrot.highbrow.model.hacker.news.item.modifier.HasUrl;
+import com.github.garyparrot.highbrow.module.ExecutorServiceModule;
 import com.github.garyparrot.highbrow.service.HackerNewsService;
 import com.google.gson.Gson;
 
@@ -58,7 +59,12 @@ public class CommentFragment extends Fragment {
     Gson gson;
 
     @Inject
+    @ExecutorServiceModule.IoExecutorService
     ExecutorService ioExecutorService;
+
+    @Inject
+    @ExecutorServiceModule.TaskExecutorService
+    ExecutorService taskExecutorService;
 
     private Story story;
 
@@ -167,7 +173,7 @@ public class CommentFragment extends Fragment {
         Timber.d(bundle.getString(BUNDLE_STORY_JSON));
         story = gson.fromJson(bundle.getString(BUNDLE_STORY_JSON), GeneralStory.class);
 
-        adapter = new CommentRecyclerAdapter(getContext(), hackerNewsService, ioExecutorService, story);
+        adapter = new CommentRecyclerAdapter(story, getContext(), hackerNewsService, taskExecutorService, ioExecutorService);
         binding.recycleView.setAdapter(adapter);
         binding.recycleView.setLayoutManager(new LinearLayoutManager(getContext()));
         binding.recycleView.addOnScrollListener(new RecyclerView.OnScrollListener() {
