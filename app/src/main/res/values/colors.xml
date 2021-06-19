@@ -13,4 +13,7 @@
     <color name="itemOn">@color/purple_500</color>
     <color name="itemUnsure">@color/purple_200</color>
     <color name="itemOff">#bbbbbb</color>
+    <color name="commentAuthorNameColor">#ee6633</color>
+    <color name="commentAuthorNameColorBad">#999999</color>
+
 </resources>

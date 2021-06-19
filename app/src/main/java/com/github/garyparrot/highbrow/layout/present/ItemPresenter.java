@@ -60,6 +60,14 @@ public class ItemPresenter {
         return Html.fromHtml(comment.getText());
     }
 
+    public static String renderAuthorName(Comment comment) {
+        if(comment.isDeleted())
+            return "[Deleted]";
+        if(comment.isDead())
+            return "[Dead] " + comment.getAuthor();
+        return comment.getAuthor();
+    }
+
     public static String toNumberFormat(int number) {
         return String.valueOf(number);
     }
