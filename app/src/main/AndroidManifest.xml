@@ -4,6 +4,8 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
 
+    <queries> <package android:name="com.google.android.apps.translate"/> </queries>
+
     <application
         android:name=".Application"
         android:icon="@mipmap/ic_launcher"
