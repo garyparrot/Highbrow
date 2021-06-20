@@ -136,6 +136,7 @@ public class StoryRecyclerAdapter extends RecyclerView.Adapter<StoryRecyclerAdap
                                 .subscribeOn(Schedulers.io())
                                 .blockingGet());
                     }).addOnSuccessListener(task -> {
+                storyIsSaved.put(storyId, task.booleanValue());
                 notifyItemChanged(position);
             });
         }
